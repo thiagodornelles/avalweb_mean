@@ -1,0 +1,54 @@
+<md-dialog aria-label="Editar turmas" flex>	
+	<md-toolbar class="md-hue-2">
+		<div class="md-toolbar-tools">
+			<h2 ng-if="!useFullScreen">Editar turma</h2>
+			<span ng-if="!useFullScreen"flex></span>
+			<input placeholder=" Pesquisar" ng-model="search" flex="70" class="search-dialog">
+			<md-button class="md-icon-button" ng-click="refreshList('')">
+				<i class="material-icons">refresh</i>
+			</md-button>
+			<span flex></span>
+			<md-button class="md-icon-button" ng-click="cancel();">			
+				<i class="material-icons">clear</i>
+			</md-button>			
+		</div>
+	</md-toolbar>		
+	<form>
+		<md-dialog-content>	
+			<md-content layout-padding>				
+				<div layout-gt-xs="row">	
+					<md-input-container class="md-block" flex>
+						<label>Nome:</label>
+						<input ng-model="clas.name">
+					</md-input-container>
+				</div>
+				<div layout="row">
+				<fieldset class="standard" flex>
+          			<legend>Alunos</legend>          			
+					<md-content>
+						<md-list style="min-height:100%;">							
+							<md-list-item id="{{s._id}}" ng-repeat="s in students | filter:search" flex>
+								{{s.name | limitTo: 30}}
+								<span flex></span>
+								<md-switch ng-model="s.selected" aria-label="aluno">
+									Matriculado?
+								</md-switch>
+								<md-divider></md-divider>
+							</md-list-item>
+						</md-list>
+					</md-content>				
+				</fieldset>				
+				</div>
+			</md-content>
+		</md-dialog-content>
+	</form>		
+	<md-dialog-actions layout="row">
+		<md-button ng-click="cancel()">
+			Cancelar
+		</md-button>
+		<span flex></span>		
+		<md-button ng-click="saveClass('ok', clas._id)">
+			Gravar
+		</md-button>
+	</md-dialog-actions>  
+</md-dialog>

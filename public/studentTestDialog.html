@@ -1,0 +1,90 @@
+<md-dialog aria-label="Prova" flex>	
+	<md-toolbar class="md-hue-2">
+		<div class="md-toolbar-tools">
+			<h2>Avaliação</h2>
+			<span flex></span>
+			<md-button class="md-icon-button" ng-click="cancel();">			
+				<i class="material-icons">clear</i>
+			</md-button>
+		</div>
+	</md-toolbar>
+	<!-- Formulário inicial -->
+	<div ng-if="form == 'startForm'">	
+		<form>
+			<md-dialog-content>	
+				<md-content layout-padding>				
+					<div layout-gt-xs="row">	
+						<h3> Pronto para iniciar a avaliação? </h3>
+					</div>
+				</md-content>	
+			</md-dialog-content>
+		</form>		
+		<md-dialog-actions layout="row">		
+			<md-button class="md-raised"  ng-click="cancel()">
+				Cancelar
+			</md-button>		
+			<span flex="5"></span>
+			<md-button class="md-raised md-primary" ng-click="startTest()">
+				Iniciar!
+			</md-button>
+			<span flex></span>
+		</md-dialog-actions> 
+	</div>
+	<!-- Formulário de questões -->
+	<div ng-if="form == '5AnswerQuestion'">
+		<form>
+			<md-dialog-content>	
+				<md-content layout-padding>				
+					<div layout="column">	
+						<h3>{{question.wording}}</h3>
+						<md-radio-group ng-model="question.answer">
+							<md-radio-button value="{{question.answers[0]._id}}">
+								{{question.answers[0].answer}}
+							</md-radio-button>
+							<md-radio-button value="{{question.answers[1]._id}}">
+								{{question.answers[1].answer}}
+							</md-radio-button>
+							<md-radio-button value="{{question.answers[2]._id}}">
+								{{question.answers[2].answer}}
+							</md-radio-button>
+							<md-radio-button value="{{question.answers[3]._id}}">
+								{{question.answers[3].answer}}
+							</md-radio-button>
+							<md-radio-button value="{{question.answers[4]._id}}">
+								{{question.answers[4].answer}}
+							</md-radio-button>
+						</md-radio-group>
+					</div>
+				</md-content>	
+			</md-dialog-content>
+		</form>		
+		<md-dialog-actions layout="row">		
+			<md-button class="md-raised" ng-click="cancel()">
+				Cancelar
+			</md-button>		
+			<span flex="5"></span>	
+			<md-button class="md-raised md-primary" ng-click="nextQuestion(question.answer)">
+				Enviar
+			</md-button>
+			<span flex></span>
+		</md-dialog-actions> 
+	</div>
+	<!-- Fim de avaliação -->
+	<div ng-if="form == 'end of test'">	
+		<form>
+			<md-dialog-content>	
+				<md-content layout-padding>				
+					<div layout-gt-xs="row">	
+						<h3> Fim da avaliação </h3>
+					</div>
+				</md-content>	
+			</md-dialog-content>
+		</form>		
+		<md-dialog-actions layout="row">		
+			<md-button class="md-raised"  ng-click="cancel()">
+				Fechar
+			</md-button>		
+			<span flex></span>			
+		</md-dialog-actions> 
+	</div>
+</md-dialog>

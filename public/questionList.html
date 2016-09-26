@@ -1,0 +1,38 @@
+<div id='questions_list' ng-controller="questionController" layout="column" layout-fill>	
+	<md-content>
+		<md-list flex>
+			<md-subheader ng-if="questions.length == 0" class="md-no-sticky">
+				Nenhuma questão encontrada.
+			</md-subheader>
+			<md-subheader ng-if="questions.length == 1" class="md-no-sticky">
+				1 resultado
+			</md-subheader>
+			<md-subheader ng-if="questions.length > 1" class="md-no-sticky">
+				{{questions.length}} resultados
+			</md-subheader>			
+			<md-list-item id="{{q._id}}" flex class="list-item" ng-repeat="q in questions"
+				ng-click="openDialogQuestion($event, q)">
+				<div class="md-list-item-text" layout="column">					
+					<h3>{{q.subject}}</h3>
+					<p>{{q.wording}}</p>						
+				</div>
+				<span flex></span>
+				<md-icon aria-label="remove question"
+				class="md-secondary md-hue-2" ng-click="removeQuestion($event, q._id)">	
+					<i class="material-icons">delete forever</i>
+				</md-icon>
+				<md-divider></md-divider>
+			</md-list-item>			
+			<md-list-item>
+				<div class="md-list-item-text" layout="column">
+					<h3>&nbsp</h3>
+					<p>&nbsp</p>
+				</div>
+			</md-list-item>
+		</md-list>
+	</md-content>		
+	<md-button id="fab_add_question" class="md-fab md-fab-bottom-right" aria-label="Add"
+	ng-click="openDialogQuestion($event, '')">
+		<i class="material-icons">add</i>
+	</md-button>		
+</div>

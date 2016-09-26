@@ -1,0 +1,59 @@
+<html>
+<head>	
+	<meta name="viewport" content="width=device-width, user-scalable=no,
+	 initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+	<!-- Chrome, Firefox OS and Opera -->		
+	<meta name="theme-color" content="#283593">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#283593">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+	<title>AvalWeb - Sistema de avaliação Web</title>
+	<link rel="stylesheet" href="./stylesheets/angular-material.css"/>	
+	<link rel="stylesheet" type="text/css" href="./stylesheets/style.css">	
+</head>
+
+<body>	
+	<div ng-app="avalweb" ng-controller="indexController" layout="row" layout-fill ng-cloak>
+    <section layout="column" flex layout-align="center center" class="login">    
+        <md-card class="md-whiteframe-4dp" flex>
+            <md-toolbar class="md-hue-2" style="min-height: 114px;">
+                <div layout="column" layout-padding layout-align="center center">
+                    <div>
+                        <i class="material-icons logo">account_circle</i>
+                    </div>
+                    <div class="md-headline no-padding-top">AvalWeb</div>
+                </div>
+            </md-toolbar>
+            <md-card-content>
+                <form>
+                    <md-input-container class="md-block">
+                        <label for="user">Usuário</label>
+                        <input type="user" name="user" ng-model="login.user" required />
+                    </md-input-container>
+                    <md-input-container class="md-block">
+                        <label for="password">Senha</label>
+                        <input type="password" name="password" ng-model="login.password" required />
+                    </md-input-container>
+                    <md-input-container class="md-block">
+                        <div layout="row" layout-align="center center">
+                            <md-button ng-click="doLogin(login)" class="md-raised md-accent" flex="50">Login</md-button>
+                        </div>
+                    </md-input-container>
+                </form>
+            </md-card-content>
+        </md-card>
+    </section>
+	</div>
+
+	<!-- Angular Material Dependencies -->
+	<script src="./js/angular.min.js"></script>
+	<script src="./js/angular-animate.min.js"></script>
+	<script src="./js/angular-aria.min.js"></script>
+	<script src="./js/angular-material.js"></script>
+
+	<script type="text/javascript" src="./javascripts/index.js"></script>	
+</body>
+</html>

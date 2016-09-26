@@ -1,0 +1,76 @@
+<html ng-app="avalweb">
+<head>	
+	<meta name="viewport" content="width=device-width, user-scalable=no,
+	 initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+	<!-- Chrome, Firefox OS and Opera -->		
+	<meta name="theme-color" content="#283593">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#283593">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+	<title>AvalWeb - Sistema de avaliação Web</title>
+	<link rel="stylesheet" href="./stylesheets/angular-material.css"/>	
+	<link rel="stylesheet" type="text/css" href="./stylesheets/style.css">	
+</head>
+<body layout="column" ng-controller="dashController">
+	<div>
+		<md-toolbar class="md-hue-2" layout="row" layout-align="end center"
+		md-scroll-shrink="false"  ng-cloak>		
+			<md-button ng-click="openLeftMenu()" class="menuButton">
+				<i class="material-icons">menu</i>
+			</md-button>			
+			<span class="logo">AvalWeb</span>
+			<i class="material-icons">keyboard_arrow_right</i>
+			<span class="activity">{{activity}}</span>
+			<span flex></span>
+			<md-button ng-click="logout()" class="menuButton">
+				<i class="material-icons">exit_to_app</i>
+			</md-button>
+		</md-toolbar>		
+	</div>
+	<div layout="row">	
+	<md-sidenav layout="column" class="md-sidenav-left md-whiteframe-z2"
+	md-component-id="left" md-is-open="isSidenavOpen" md-disable-backdrop="true"
+	md-swipe-left="onSwipeLeft()">
+		<md-toolbar class="md-hue-2">
+			<span flex></span>
+			<div layout="column" class="md-toolbar-tools-bottom inset">				
+				<user-avatar></user-avatar>
+				<span></span>				
+				<div>Aluno</div>
+				<div>Ciclano</div>	
+			</div>			
+		</md-toolbar>
+		<md-list flex>			
+			<md-list-item>
+				<a ng-href="/studenttests" ng-click="menuClose()">
+					<md-item-content md-ink-ripple layout="row">
+						<div class="inset">							
+							<i class="material-icons">description</i>
+						</div>
+						<div class="inset">Avaliações</div>
+					</md-item-content>
+				</a>
+			</md-list-item>			
+		</md-list>
+	</md-sidenav>
+	<md-content style="width: 100%;">
+		<ng-view layout-fill>
+		</ng-view>
+	</md-content>
+	</div>
+
+	<!-- Angular Material Dependencies -->
+	<script src="./js/angular.min.js"></script>
+	<script src="./js/angular-animate.min.js"></script>
+	<script src="./js/angular-aria.min.js"></script>
+	<script src="./js/angular-material.js"></script>
+	<script src="./js/angular-route.js"></script>
+	<script src="./js/moment.js"></script>
+	
+	<script type="text/javascript" src="./javascripts/dashboard.js"></script>
+	<script type="text/javascript" src="./javascripts/studentTestController.js"></script>
+</body>
+</html>

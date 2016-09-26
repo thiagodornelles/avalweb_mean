@@ -1,0 +1,130 @@
+<md-dialog aria-label="Editar questão" flex>	
+	<md-toolbar class="md-hue-2">
+		<div class="md-toolbar-tools">
+			<h2>Editar questão</h2>
+			<span flex></span>
+			<md-button class="md-icon-button" ng-click="cancel();">			
+				<i class="material-icons">clear</i>
+			</md-button>
+		</div>
+	</md-toolbar>		
+	<form>
+		<md-dialog-content>	
+			<md-content layout-padding>					
+				<md-input-container class="md-block">	          		
+					<label>Enunciado:</label>
+					<textarea ng-model="question.wording" md-maxlength="500" length="50" rows="4" md-select-on-focus
+					ng-required="true">
+					</textarea>
+				</md-input-container>
+				<md-input-container class="md-block">	          		
+					<label>Assunto:</label>
+					<md-select ng-model="question.subject">
+					<md-option value="Matematica">
+						Matemática
+					</md-option>
+					<md-option value="Portugues">
+						Português
+					</md-option>
+					<md-option value="Geografia">
+						Geografia
+					</md-option>
+					</md-select>
+				</md-input-container>				
+				<div>
+					<fieldset class="standard">
+          				<legend>Alternativa 1</legend>			
+						<div layout-gt-sm="row" flex>
+							<md-input-container class="md-block" flex>
+								<label>Alternativa 1:</label>
+								<input ng-model="question.answers[0].answer">
+							</md-input-container>	
+							<md-input-container class="md-block" flex>
+								<label>Feedback 1:</label>
+								<input ng-model="question.answers[0].feedback">
+							</md-input-container>
+							<md-switch ng-model="question.answers[0].rightAnswer" aria-label="Correta 1">
+								Correta
+							</md-switch>
+							<span>&nbsp</span>
+						</div>
+					</fieldset>
+					<fieldset class="standard">
+          				<legend>Alternativa 2</legend>
+						<div layout-gt-sm="row" flex>			
+							<md-input-container class="md-block" flex>
+								<label>Alternativa 2:</label>
+								<input ng-model="question.answers[1].answer">
+							</md-input-container>						
+							<md-input-container class="md-block" flex>
+								<label>Feedback 2:</label>
+								<input ng-model="question.answers[1].feedback">
+							</md-input-container>
+							<md-switch ng-model="question.answers[1].rightAnswer" aria-label="Correta 2">
+								Correta
+							</md-switch>
+							<span>&nbsp</span>
+						</div>
+					</fieldset>
+					<fieldset class="standard">
+          				<legend>Alternativa 3</legend>
+						<div layout-gt-sm="row" flex>			
+							<md-input-container class="md-block" flex>
+								<label>Alternativa 3:</label>
+								<input ng-model="question.answers[2].answer">
+							</md-input-container>						
+							<md-input-container class="md-block" flex>
+								<label>Feedback 3:</label>
+								<input ng-model="question.answers[2].feedback">
+							</md-input-container>
+							<md-switch ng-model="question.answers[2].rightAnswer" aria-label="Correta 3">
+								Correta
+							</md-switch>							
+						</div>
+					</fieldset>
+					<fieldset class="standard">
+          				<legend>Alternativa 4</legend>
+						<div layout-gt-sm="row" flex>
+							<md-input-container class="md-block" flex>
+								<label>Alternativa 4:</label>
+								<input ng-model="question.answers[3].answer">
+							</md-input-container>						
+							<md-input-container class="md-block" flex>
+								<label>Feedback 4:</label>
+								<input ng-model="question.answers[3].feedback">
+							</md-input-container>
+							<md-switch ng-model="question.answers[3].rightAnswer" aria-label="Correta 4">
+								Correta
+							</md-switch>						
+						</div>
+					</fieldset>
+					<fieldset class="standard">
+          				<legend>Alternativa 5</legend>
+						<div layout-gt-sm="row" flex>		
+							<md-input-container class="md-block" flex>
+								<label>Alternativa 5:</label>
+								<input ng-model="question.answers[4].answer">
+							</md-input-container>
+							<md-input-container class="md-block" flex>
+								<label>Feedback 5:</label>
+								<input ng-model="question.answers[4].feedback">
+							</md-input-container>
+							<md-switch ng-model="question.answers[4].rightAnswer" aria-label="Correta 5">
+								Correta
+							</md-switch>											
+						</div>
+					</fieldset>
+				</div>
+			</md-content>	
+		</md-dialog-content>
+	</form>		
+	<md-dialog-actions layout="row">		
+		<md-button ng-click="cancel()">
+			Cancelar
+		</md-button>
+		<span flex></span>		
+		<md-button ng-click="saveQuestion('ok', question._id)">
+			Gravar
+		</md-button>
+	</md-dialog-actions>  
+</md-dialog>

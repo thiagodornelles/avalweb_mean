@@ -72,7 +72,9 @@ router.get('/search', function(req, res, next) {
  */
 router.post('/starttest', function(req, res, next) {	
 	//Validando se o teste existe	
-	var query = testModel.findById(req.body._id).populate('questions.id');
+	var query = testModel.findById(req.body._id)	
+	.populate({ path: 'questions.id', select: '-answers.feedback -answers.rightAnswer' });
+
 	query.exec(function(err, result){
 		if (err)
 			res.send(err);
@@ -114,10 +116,16 @@ router.post('/checkquestion', function(req, res, next){
 				}
 				if(rightAnswer){
 					question.right = true;
-					res.send(question);
 				}
-			}			
+				res.send(question);
+			}
+			else{
+				res.end();		
+			}		
 		});
+	}
+	else{
+		res.end();
 	}
 });
 
@@ -140,7 +148,9 @@ router.post('/nextquestion', function(req, res, next) {
 			if (studTest.length > 0){
 				
 				//Busca os dados das questões da avaliação
-				testModel.findById(req.body._id).populate('questions.id')
+				testModel.findById(req.body._id)
+				.populate({ path: 'questions.id',
+						    select: '-answers.feedback -answers.rightAnswer' })
 				
 				.exec(function(err, test){
 					if (test){

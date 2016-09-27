@@ -44,7 +44,8 @@ app.controller("studentTestController", function($scope, $http, $mdDialog, $mdMe
 var testDialogController = function($scope, $mdDialog, $http, test) {		
 	$scope.test = angular.copy(test);
 	$scope.form = 'startForm';
-	$scope.question = {};
+	$scope.question = {};	
+	$scope.questionChecked = false;
 
 	$scope.cancel = function() {
 		$mdDialog.cancel();		
@@ -58,6 +59,20 @@ var testDialogController = function($scope, $mdDialog, $http, test) {
 				$scope.question = response;
 			}
 		});
+	};
+
+	$scope.checkQuestion = function(answer_id){
+		if (answer_id){
+			$scope.questionChecked = true;
+			$http.post('/studenttests/checkquestion', $scope.answer_id)
+			.success(function(response, status){
+				//Preenche com a questão com respostas e feedbacks
+				if(response){
+					console.log(response);
+					$scope.question = response;
+				}
+			});
+		}
 	};
 
 	$scope.nextQuestion = function(answer_id){
@@ -74,7 +89,8 @@ var testDialogController = function($scope, $mdDialog, $http, test) {
 					$scope.question = response;
 				}
 			});
-		}		
+		}
+		$scope.questionChecked = false;;
 	};
 
 	$scope.saveTest = function(event, id){				

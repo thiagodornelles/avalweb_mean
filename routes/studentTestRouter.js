@@ -2,8 +2,9 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 var mongoose = require('mongoose');
-var testModel = require('../models/testsModel')
-var studentTestModel = require('../models/studentTestsModel')
+var testModel = require('../models/testsModel');
+var studentTestModel = require('../models/studentTestsModel');
+var questionModel = require('../models/questionsModel');
 var isLoggedIn = require('./baseMiddlewares');
 var TestStrategy = require('../testStrategy');
 
@@ -19,9 +20,7 @@ var testStrat = new TestStrategy(studentTestModel, testModel);
 // Implementamos uma estrategia conforme a resposta da última questão
 // e a questões do banco
 var DefaultStrategy = function(){	
-	this.nextQuestion = function(answer, questions){
-		// console.log(questions);
-		
+	this.nextQuestion = function(answer, questions){		
 		if(questions.length == 0){
 			return "end of test";
 		}
@@ -100,8 +99,31 @@ router.post('/starttest', function(req, res, next) {
 	});		
 });
 
+router.post('/checkquestion', function(req, res, next){
+	if(req.body.answer_id && req.body.question_id){
+		questionModel.findById(req.body.question_id)
+
+		.exec(function(err, question){
+			if(question){
+				for (var i = 0; i < question.answers.length; i++) {								
+					if (question.answers[i]._id == req.body.answer_id &&
+						question.answers[i].rightAnswer){
+						rightAnswer = true;
+						break;
+					}
+				}
+				if(rightAnswer){
+					question.right = true;
+					res.send(question);
+				}
+			}			
+		});
+	}
+});
+
 /*
  * Rota que encaminha as questões
+ * TODO Avaliar a modularização...
  */
 router.post('/nextquestion', function(req, res, next) {
 	if (req.body.answer_id){
@@ -112,39 +134,57 @@ router.post('/nextquestion', function(req, res, next) {
 		})
 		.limit(1)
 		.sort({ 'date': -1 })
+
 		.exec(function(err, studTest){
+			//Validando se encontrou registro de avaliação para este usuário
 			if (studTest.length > 0){
+				
 				//Busca os dados das questões da avaliação
-				var query = testModel.findById(req.body._id).populate('questions.id');
-				query.exec(function(err, test){					
+				testModel.findById(req.body._id).populate('questions.id')
+				
+				.exec(function(err, test){
 					if (test){
-						//Apenas questões não respondidas serão avaliadas pelo seletor de questões
-						var qtemp = test.questions;
-						var questionsAns = studTest[0].questionsAnswered;						
-						for (var i = qtemp.length-1 ; i > -1; i--){
-							for (var j = 0; j < questionsAns.length; j++){
-								console.log(questionsAns[j].toString() + ':' + qtemp[i].id._id.toString());
-								if (questionsAns[j].toString() == qtemp[i].id._id.toString()){
-									qtemp.splice(i, 1);
-									break;									
-								}								
+						var qtemp = test.questions;						
+						//Verificar se o aluno acertou a última questão respondida
+						answered = studTest[0].questionsAnswered;
+						var lastQuestion = answered[answered.length-1];
+						//Procurando a questão respondida
+						questionModel.findById(lastQuestion)
+						
+						.exec(function(err, question){
+							var rightAnswer = false;
+							for (var i = 0; i < question.answers.length; i++) {								
+								if (question.answers[i]._id == req.body.answer_id &&
+									question.answers[i].rightAnswer){
+									rightAnswer = true;
+									break;
+								}
 							}
-						}
-
-						//Buscando nova questão
-						var question = testStrat.nextQuestion(req.body.answer_id, qtemp);
-
-						//Envia a questão para o front-end
-						if (question == 'end of test') {
-							console.log(question);
-							res.send(question);
-						}
-						else {
-							//Grava nova questão a responder
-							studTest[0].questionsAnswered.push(question.id._id);
-							studTest[0].save();
-							res.send(question.id);
-						}
+							//Remoção das questões já respondidas
+							//As questões não respondidas serão avaliadas pelo seletor de questões
+							var questionsAns = studTest[0].questionsAnswered;
+							for (var i = qtemp.length-1 ; i > -1; i--){
+								for (var j = 0; j < questionsAns.length; j++){									
+									if (questionsAns[j].toString() == qtemp[i].id._id.toString()){
+										qtemp.splice(i, 1);
+										break;									
+									}
+								}
+							}
+							//Buscando nova questão
+							var question = testStrat.nextQuestion(rightAnswer, qtemp);
+							//Envia a questão para o front-end
+							if (question == 'end of test') {
+								// console.log(question);
+								res.send(question);
+							}
+							else {
+								//Grava nova questão a responder
+								studTest[0].questionsAnswered.push(question.id._id);
+								studTest[0].save();
+								res.send(question.id);
+							}
+						});
 					}
 				});
 			}

@@ -102,11 +102,25 @@ router.post('/starttest', function(req, res, next) {
 });
 
 router.post('/checkquestion', function(req, res, next){
-	if(req.body.answer_id && req.body.question_id){
-		questionModel.findById(req.body.question_id)
 
+	if(req.body.answer_id){
+		//Marcando a resposta enviada pelo usuário
+		studentTestModel.find({
+			'user': req.session.passport.user.username,
+			'test': req.body._id //ID da avaliação
+		})
+		.limit(1)
+		.sort({ 'date': -1 })
+		.exec(function(err, studTest){
+			console.log(req.body.answer_id);		
+			studTest[0].answers.push(req.body.answer_id);
+			studTest[0].save();
+		});
+		//Buscando a questão na base
+		questionModel.findById(req.body.question_id)
 		.exec(function(err, question){
 			if(question){
+				//Conferindo se a resposta está correta
 				for (var i = 0; i < question.answers.length; i++) {								
 					if (question.answers[i]._id == req.body.answer_id &&
 						question.answers[i].rightAnswer){
@@ -114,9 +128,11 @@ router.post('/checkquestion', function(req, res, next){
 						break;
 					}
 				}
+				//Marca a questão como correta se for o caso
 				if(rightAnswer){
 					question.right = true;
 				}
+				//Enviando a questão com as respostas e se foi acertada ou não
 				res.send(question);
 			}
 			else{
@@ -181,11 +197,12 @@ router.post('/nextquestion', function(req, res, next) {
 									}
 								}
 							}
-							//Buscando nova questão
+
+							//**** Buscando nova questão *****
 							var question = testStrat.nextQuestion(rightAnswer, qtemp);
-							//Envia a questão para o front-end
-							if (question == 'end of test') {
-								// console.log(question);
+							
+							//String que termina o teste
+							if (question == 'end of test') {								
 								res.send(question);
 							}
 							else {

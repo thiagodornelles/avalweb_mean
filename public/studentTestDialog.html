@@ -41,33 +41,50 @@
 						<div layout="row">
 							<div flex="33">
 							<md-radio-group ng-model="question.answer">
-								<md-radio-button value="{{question.answers[0]._id}}">
+								<md-radio-button value="{{question.answers[0]._id}}"
+								ng-disabled="question.disableControls">
 									{{question.answers[0].answer}}
 								</md-radio-button>							
-								<md-radio-button value="{{question.answers[1]._id}}">
+								<md-radio-button value="{{question.answers[1]._id}}"
+								ng-disabled="question.disableControls">
 									{{question.answers[1].answer}}
 								</md-radio-button>
-								<md-radio-button value="{{question.answers[2]._id}}">
+								<md-radio-button value="{{question.answers[2]._id}}"
+								ng-disabled="question.disableControls">
 									{{question.answers[2].answer}}
 								</md-radio-button>
-								<md-radio-button value="{{question.answers[3]._id}}">
+								<md-radio-button value="{{question.answers[3]._id}}"
+								ng-disabled="question.disableControls">
 									{{question.answers[3].answer}}
 								</md-radio-button>
-								<md-radio-button value="{{question.answers[4]._id}}">
+								<md-radio-button value="{{question.answers[4]._id}}"
+								ng-disabled="question.disableControls">
 									{{question.answers[4].answer}}
 								</md-radio-button>
 							</md-radio-group>
 							</div>
 							<div ng-if="questionChecked" flex="67" layout="column">
-								<span style="margin-bottom:16px;"> Feedback: {{question.answers[0].feedback}} </span>
-								<span style="margin-bottom:16px;"> Feedback: {{question.answers[1].feedback}} </span>
-								<span style="margin-bottom:16px;"> Feedback: {{question.answers[2].feedback}} </span>
-								<span style="margin-bottom:16px;"> Feedback: {{question.answers[3].feedback}} </span>
-								<span style="margin-bottom:16px;"> Feedback: {{question.answers[4].feedback}} </span>
+								<span class="feedback-span">
+								 {{question.answers[0].feedback}}
+								</span>
+								<span class="feedback-span">
+								 {{question.answers[1].feedback}}
+								</span>
+								<span class="feedback-span">
+								 {{question.answers[2].feedback}}
+								</span>
+								<span class="feedback-span">
+								 {{question.answers[3].feedback}}
+								</span>
+								<span class="feedback-span">
+								 {{question.answers[4].feedback}}
+								</span>
 							</div>
 						</div>
-						<h3 ng-if="question.right"> Certa resposta! </h3>
-						<h3 ng-if="!question.right == false"> Resposta errada </h3>
+						<div style="height:40px;">
+							<h3 ng-if="question.right"> Certa resposta! </h3>
+							<h3 ng-if="question.right != undefined && question.right == false"> Resposta errada </h3>
+						</div>				
 					</div>
 				</md-content>	
 			</md-dialog-content>
@@ -77,7 +94,7 @@
 				Cancelar
 			</md-button>
 			<span flex="5"></span>			
-			<md-button class="md-raised" ng-click="checkQuestion(question.answer)">
+			<md-button class="md-raised" ng-click="checkQuestion(question.answer, question._id)">
 				Enviar
 			</md-button>
 			<span flex="5"></span>			

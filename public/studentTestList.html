@@ -14,7 +14,7 @@
 				ng-click="openDialogStudentTest($event, s)">
 				<div class="md-list-item-text" layout="column">					
 					<h3>{{s.name}}</h3>
-					<!-- <p>{{s.date | date:'dd/MM/yyyy'}}</p>									 -->
+					<p>{{s.date | date:'dd/MM/yyyy'}}</p>									
 				</div>
 				<span flex></span>				
 				<md-divider></md-divider>
@@ -26,9 +26,5 @@
 				</div>
 			</md-list-item>			
 		</md-list>
-	</md-content>		
-	<md-button id="fab_add_class" class="md-fab md-fab-bottom-right" aria-label="Add"
-	ng-click="openDialogStudentTest($event, '')">
-		<i class="material-icons">add</i>
-	</md-button>		
+	</md-content>	
 </div>

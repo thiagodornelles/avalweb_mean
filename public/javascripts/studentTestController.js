@@ -61,16 +61,19 @@ var testDialogController = function($scope, $mdDialog, $http, test) {
 		});
 	};
 
-	$scope.checkQuestion = function(answer_id){
+	$scope.checkQuestion = function(answer_id, question_id){
 		$scope.test.answer_id = answer_id;
+		$scope.test.question_id = question_id;
 		if (answer_id){
 			$scope.questionChecked = true;
 			$http.post('/studenttests/checkquestion', $scope.test)
 			.success(function(response, status){
 				//Preenche com a questão com respostas e feedbacks
 				if(response){
-					// console.log(response);
+					var temp = $scope.question;
 					$scope.question = response;
+					$scope.question.answer = temp.answer;
+					$scope.question.disableControls = true;
 				}
 			});
 		}

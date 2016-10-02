@@ -103,7 +103,7 @@ router.post('/starttest', function(req, res, next) {
 
 router.post('/checkquestion', function(req, res, next){
 
-	if(req.body.answer_id){
+	if(req.body.answer_id && req.body.question_id){
 		//Marcando a resposta enviada pelo usuário
 		studentTestModel.find({
 			'user': req.session.passport.user.username,
@@ -111,27 +111,26 @@ router.post('/checkquestion', function(req, res, next){
 		})
 		.limit(1)
 		.sort({ 'date': -1 })
-		.exec(function(err, studTest){
-			console.log(req.body.answer_id);		
+		.exec(function(err, studTest){				
 			studTest[0].answers.push(req.body.answer_id);
 			studTest[0].save();
 		});
-		//Buscando a questão na base
+		//Buscando a questão na base		
 		questionModel.findById(req.body.question_id)
 		.exec(function(err, question){
-			if(question){
-				//Conferindo se a resposta está correta
-				for (var i = 0; i < question.answers.length; i++) {								
-					if (question.answers[i]._id == req.body.answer_id &&
+			if (question){
+				//Tranformar em um objeto normal javascript para permitir adições
+				question = question.toObject();
+				//Campo para marcar a resposta como correta se for o caso
+				question.right = false;
+				//Conferindo se a resposta está correta				
+				for (var i = 0; i < question.answers.length; i++) {					
+					if (question.answers[i]._id.toString() === req.body.answer_id &&
 						question.answers[i].rightAnswer){
-						rightAnswer = true;
+						question.right = true;						
 						break;
 					}
-				}
-				//Marca a questão como correta se for o caso
-				if(rightAnswer){
-					question.right = true;
-				}
+				}				
 				//Enviando a questão com as respostas e se foi acertada ou não
 				res.send(question);
 			}
@@ -161,26 +160,26 @@ router.post('/nextquestion', function(req, res, next) {
 
 		.exec(function(err, studTest){
 			//Validando se encontrou registro de avaliação para este usuário
+			console.log(studTest);
 			if (studTest.length > 0){
 				
 				//Busca os dados das questões da avaliação
 				testModel.findById(req.body._id)
-				.populate({ path: 'questions.id',
-						    select: '-answers.feedback -answers.rightAnswer' })
-				
+				.populate({ path: 'questions.id' })				
 				.exec(function(err, test){
 					if (test){
 						var qtemp = test.questions;						
 						//Verificar se o aluno acertou a última questão respondida
 						answered = studTest[0].questionsAnswered;
 						var lastQuestion = answered[answered.length-1];
-						//Procurando a questão respondida
-						questionModel.findById(lastQuestion)
 						
-						.exec(function(err, question){
+						//Procurando a questão respondida
+						questionModel.findById(lastQuestion)						
+						.exec(function(err, question){							
 							var rightAnswer = false;
+							var lastAnswer = studTest[0].answers[studTest[0].answers.length-1];
 							for (var i = 0; i < question.answers.length; i++) {								
-								if (question.answers[i]._id == req.body.answer_id &&
+								if (question.answers[i]._id == lastAnswer &&
 									question.answers[i].rightAnswer){
 									rightAnswer = true;
 									break;
@@ -193,7 +192,7 @@ router.post('/nextquestion', function(req, res, next) {
 								for (var j = 0; j < questionsAns.length; j++){									
 									if (questionsAns[j].toString() == qtemp[i].id._id.toString()){
 										qtemp.splice(i, 1);
-										break;									
+										break;		
 									}
 								}
 							}

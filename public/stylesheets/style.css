@@ -72,8 +72,14 @@ md-content {
 	}
 }
 
-.search-button{
+.search-button {
 	margin: 20px !important;
+}
+
+.feedback-span {
+	color: #8b4513;
+	margin-bottom:16px;
+	min-height: 16px;
 }
 
 md-sidenav{

@@ -15,7 +15,7 @@ var TestStrategy = require('../testStrategy');
  */
 
 //Instanciamos o objeto que guarda a estratégia de aplicação
-var testStrat = new TestStrategy(studentTestModel, testModel);
+var testStrat = new TestStrategy();
 
 // Implementamos uma estrategia conforme a resposta da última questão
 // e a questões do banco
@@ -28,14 +28,49 @@ var DefaultStrategy = function(){
 		//Ordenando pela prioridade
 		questions.sort(function(a, b){
 			return a.priority - b.priority;
-		});				
+		});
 		
 		return questions[0];
 	}
 };
 //Instanciamos esta estrategia
 var def = new DefaultStrategy();
-//Setamos nossa estrategia no objeto que gerencia a escolhas das questões
+
+var BalanceStrategy = function(){	
+	this.nextQuestion = function(answer, questions){
+		if(questions.length == 0){
+			return "end of test";
+		}
+		//Teste iniciando... Seleciona uma questão difícil
+		else if(answer = ''){
+			//Ordenando pela dificuldade, retorna a mais difícil
+			questions.sort(function(a, b){
+				return b.difficulty - a.difficulty;
+			});
+			return questions[0];
+		}		
+		//Acertou a última questao
+		else if(answer == true){
+			//Ordenando pela dificuldade, retorna a mais difícil
+			questions.sort(function(a, b){
+				return b.difficulty - a.difficulty;
+			});
+			return questions[0];
+		}
+		else if(answer == false){
+			//Ordenando pela dificuldade, retorna a mais fácil
+			questions.sort(function(a, b){
+				return a.difficulty - b.difficulty;
+			});
+			return questions[0];
+		}
+		
+		return questions[0];
+	}
+};
+var difBalance = new BalanceStrategy();
+
+//Setamos nossa estrategia padrão no objeto que gerencia a escolhas das questões
 testStrat.setStrategy(def);
 
 /*
@@ -79,6 +114,13 @@ router.post('/starttest', function(req, res, next) {
 		if (err)
 			res.send(err);
 		else{
+			if(result.strategy == 'fixed_order')
+				testStrat.setStrategy(def);
+			else if(result.strategy == 'dif_balance')
+				testStrat.setStrategy(difBalance);
+
+			// console.log(result.strategy);
+
 			//Se existe, grava a informação do usuário no log da prova
 			if (result._id == req.body._id){				
 				//Solicita uma questão para começar.
@@ -160,14 +202,21 @@ router.post('/nextquestion', function(req, res, next) {
 
 		.exec(function(err, studTest){
 			//Validando se encontrou registro de avaliação para este usuário
-			console.log(studTest);
+			// console.log(studTest);
 			if (studTest.length > 0){
-				
 				//Busca os dados das questões da avaliação
 				testModel.findById(req.body._id)
 				.populate({ path: 'questions.id' })				
 				.exec(function(err, test){
 					if (test){
+						//Selecionando a estratégia
+						if(test.strategy == 'fixed_order')
+							testStrat.setStrategy(def);
+						else if(test.strategy == 'dif_balance')
+							testStrat.setStrategy(difBalance);
+					
+						// console.log(test.strategy);
+
 						var qtemp = test.questions;						
 						//Verificar se o aluno acertou a última questão respondida
 						answered = studTest[0].questionsAnswered;

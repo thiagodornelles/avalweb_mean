@@ -35,7 +35,8 @@ router.post('/', function(req, res, next) {
 	if(req.body.wording && req.body.subject){		
 		var question = new questionModel();
 		question.wording = req.body.wording;
-		question.subject = req.body.subject;		
+		question.subject = req.body.subject;
+		question.difficulty = req.body.difficulty;
 		question.answers.push(req.body.answers[0]);
 		question.answers.push(req.body.answers[1]);
 		question.answers.push(req.body.answers[2]);
@@ -59,7 +60,8 @@ router.put('/id/:id', function(req, res, next) {
 	questionModel.findById(req.params.id, function(err, result){
 		if(req.body.wording && req.body.subject){			
 			result.wording = req.body.wording;
-			result.subject = req.body.subject;			
+			result.subject = req.body.subject;
+			result.difficulty = req.body.difficulty;		
 			result.answers[0] = req.body.answers[0];
 			result.answers[1] = req.body.answers[1];
 			result.answers[2] = req.body.answers[2];

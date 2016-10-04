@@ -23,7 +23,18 @@
 					</md-input-container>					
 					<md-datepicker ng-model="test.date" md-placeholder="Aplicação">
           			</md-datepicker>
-          		</div>          		
+          		</div>
+          		<md-input-container class="md-block">	          		
+					<label>Estratégia de aplicação:</label>
+					<md-select ng-model="test.strategy">
+						<md-option value="fixed_order">
+							Por ordem fixa
+						</md-option>
+						<md-option value="dif_balance">
+							Balanço de dificuldade
+						</md-option>
+					</md-select>
+				</md-input-container>		
 				<div layout="row">
 				<fieldset class="standard" flex>
           			<legend>Questões</legend>          			

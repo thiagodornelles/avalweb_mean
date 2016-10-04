@@ -34,6 +34,7 @@ router.post('/', function(req, res, next) {
 		var test = new testModel();
 		test.name = req.body.name;
 		test.date = req.body.date;
+		test.strategy = req.body.strategy;
 		for(var i = 0; i < req.body.questions.length; i++){
 			test.questions.push(req.body.questions[i]);
 		}		
@@ -56,6 +57,7 @@ router.put('/id/:id', function(req, res, next) {
 			result.name = req.body.name;
 			result.date = req.body.date;
 			result.questions = req.body.questions;			
+			result.strategy = req.body.strategy;
 			result.save(function(err) {
 				if (err)
 					res.send(err);

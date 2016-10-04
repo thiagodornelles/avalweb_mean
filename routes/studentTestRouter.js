@@ -26,7 +26,7 @@ var DefaultStrategy = function(){
 		}
 
 		//Ordenando pela prioridade
-		questions.sort(function(a, b){
+		questions.sort(function(a, b){			
 			return a.priority - b.priority;
 		});
 		
@@ -37,34 +37,40 @@ var DefaultStrategy = function(){
 var def = new DefaultStrategy();
 
 var BalanceStrategy = function(){	
-	this.nextQuestion = function(answer, questions){
+	this.nextQuestion = function(answer, questions){		
 		if(questions.length == 0){
 			return "end of test";
 		}
+		console.log(answer);
 		//Teste iniciando... Seleciona uma questão difícil
-		else if(answer = ''){
+		if(answer === ''){
 			//Ordenando pela dificuldade, retorna a mais difícil
 			questions.sort(function(a, b){
-				return b.difficulty - a.difficulty;
-			});
+				return b.id.difficulty - a.id.difficulty;
+			});			
+			console.log("Iniciando");
+			console.log(questions[0]);			
 			return questions[0];
 		}		
 		//Acertou a última questao
-		else if(answer == true){
-			//Ordenando pela dificuldade, retorna a mais difícil
+		else if(answer){
+			//Ordenando pela dificuldade, retorna a mais difícil			
 			questions.sort(function(a, b){
-				return b.difficulty - a.difficulty;
-			});
+				return b.id.difficulty - a.id.difficulty;
+			});			
+			console.log("Questao mais dificil");
+			console.log(questions[0]);
 			return questions[0];
 		}
-		else if(answer == false){
-			//Ordenando pela dificuldade, retorna a mais fácil
-			questions.sort(function(a, b){
-				return a.difficulty - b.difficulty;
-			});
+		else if(!answer){
+			//Ordenando pela dificuldade, retorna a mais fácil			
+			questions.sort(function(a, b){				
+				return a.id.difficulty - b.id.difficulty;
+			});			
+			console.log("Questao mais facil");
+			console.log(questions[0]);
 			return questions[0];
-		}
-		
+		}		
 		return questions[0];
 	}
 };
@@ -119,12 +125,10 @@ router.post('/starttest', function(req, res, next) {
 			else if(result.strategy == 'dif_balance')
 				testStrat.setStrategy(difBalance);
 
-			// console.log(result.strategy);
-
 			//Se existe, grava a informação do usuário no log da prova
 			if (result._id == req.body._id){				
 				//Solicita uma questão para começar.
-				var question = testStrat.nextQuestion('', result.questions);
+				var question = testStrat.nextQuestion('', result.questions);				
 				var studTest = new studentTestModel();				
 				studTest.user = req.session.passport.user.username;
 				studTest.test = req.body._id;
@@ -228,7 +232,7 @@ router.post('/nextquestion', function(req, res, next) {
 							var rightAnswer = false;
 							var lastAnswer = studTest[0].answers[studTest[0].answers.length-1];
 							for (var i = 0; i < question.answers.length; i++) {								
-								if (question.answers[i]._id == lastAnswer &&
+								if (question.answers[i]._id.toString() == lastAnswer.toString() &&
 									question.answers[i].rightAnswer){
 									rightAnswer = true;
 									break;
@@ -246,8 +250,8 @@ router.post('/nextquestion', function(req, res, next) {
 								}
 							}
 
-							//**** Buscando nova questão *****
-							var question = testStrat.nextQuestion(rightAnswer, qtemp);
+							//**** Buscando nova questão *****							
+							var question = testStrat.nextQuestion(rightAnswer, qtemp);							
 							
 							//String que termina o teste
 							if (question == 'end of test') {								

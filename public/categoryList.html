@@ -1,0 +1,18 @@
+<div id='categories_list' ng-controller="categoryController" layout="column" layout-fill>	
+	<md-content>
+		<md-list flex>
+			<md-subheader ng-if="categories.length == 0" class="md-no-sticky">
+				Nenhuma categoria encontrada.
+			</md-subheader>
+			<md-subheader ng-if="categories.length == 1" class="md-no-sticky">
+				1 resultado
+			</md-subheader>
+			<md-subheader ng-if="categories.length > 1" class="md-no-sticky">
+				{{categories.length}} resultados
+			</md-subheader>			
+	</md-content>		
+	<md-button id="fab_add_category" class="md-fab md-fab-bottom-right" aria-label="Add"
+	ng-click="openDialogCategory($event, '')">
+		<i class="material-icons">add</i>
+	</md-button>		
+</div>

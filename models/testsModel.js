@@ -7,6 +7,7 @@ var testSchema = new mongoose.Schema({
 		priority: Number,		
 		id: { type: mongoose.Schema.Types.ObjectId, ref: 'Question' }
 	}],
+	categories : [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
 	strategy : String
 });
 

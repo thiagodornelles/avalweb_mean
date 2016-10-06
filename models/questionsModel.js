@@ -9,9 +9,7 @@ var questionSchema = new mongoose.Schema({
 		feedback: String,
 		rightAnswer: Boolean
 	}],
-	difficulty : Number,
-	caseRight : Number,
-	caseWrong : Number
+	difficulty : Number
 });
 
 module.exports = mongoose.model('Question', questionSchema);

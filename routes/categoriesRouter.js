@@ -6,7 +6,7 @@ var categoryModel = require('../models/categoriesModel');
 var isLoggedIn = require('./baseMiddlewares');
 
 
-router.get('/', isLoggedIn, function(req, res, next){
+router.get('/', isLoggedIn, function(req, res, next){	
 	return next();
 });
 
@@ -22,10 +22,16 @@ router.get('/id/:id', function(req, res, next){
 });
 
 router.get('/search', function(req, res, next) {		
-	var query = categoryModel.find({name: new RegExp(req.query.filter, 'i')});
-	query.exec(function (err, result){		
-		res.json(result);		
-	});		
+	var query = categoryModel.find({name: new RegExp(req.query.filter, 'i')})
+	.populate({ path: 'subCategories.id',
+		populate: {
+	    	path: 'subCategories.id',
+	    	model: 'Category'
+	    }
+	});	
+	query.exec(function (err, result){
+		res.json(result);
+	});
 });
 
 router.post('/', function(req, res, next) {	

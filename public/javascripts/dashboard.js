@@ -78,6 +78,10 @@ app.config(['$routeProvider', '$locationProvider',
 		.when('/start', {
 			templateUrl: './intro.html'			
 		})
+		.when('/categories', {
+			templateUrl: './categoryList.html',
+			controller: 'categoryController'
+		})
 		.when('/studenttests', {
 			templateUrl: './studentTestList.html',
 			controller: 'studentTestController'			

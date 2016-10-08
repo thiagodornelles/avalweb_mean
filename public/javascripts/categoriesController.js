@@ -7,7 +7,7 @@ app.controller("categoryController", function($scope, $http, $mdDialog, $mdMedia
 	$scope.refreshList = function(){
 		$http.get('/categories/search')
 		.then(function(res){
-			$scope.categories = res.data;					
+			$scope.categories = res.data;
 		},
 		function(res){
 			$scope.categories = [];				

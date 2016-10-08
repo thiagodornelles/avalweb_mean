@@ -9,7 +9,44 @@
 			</md-subheader>
 			<md-subheader ng-if="categories.length > 1" class="md-no-sticky">
 				{{categories.length}} resultados
-			</md-subheader>			
+			</md-subheader>
+			<div ng-repeat="c in categories">
+				<md-list-item ng-if="!c.superCategory">
+					<div layout="row">
+						<div class="md-list-item-text" layout="column">
+							<h3>{{c.name}}</h3>						
+						</div>
+						<md-icon class="material-icons" ng-click="toggleItems(item)" style="margin-left: 10px;">
+							<i class="material-icons">{{item.expanded ? 'expand_less' : 'expand_more' }}</i>
+						</md-icon>
+					</div>				
+				</md-list-item>
+				<div ng-repeat="sc in c.subCategories">
+					<md-list-item ng-if="!c.superCategory">
+						<div layout="row">
+							<div class="md-list-item-text" layout="column">					
+								<p style="padding-left:3em">{{sc.id.name}}</p>
+							</div>
+							<md-icon class="material-icons" ng-click="toggleItems(item)" style="margin-left: 10px;">
+								<i class="material-icons">{{item.expanded ? 'expand_less' : 'expand_more' }}</i>
+							</md-icon>
+						</div>
+					</md-list-item>
+					<div ng-repeat="ssc in sc.id.subCategories">
+						<md-list-item ng-if="!c.superCategory">
+						<div layout="row">
+							<div class="md-list-item-text" layout="column">
+								<p style="padding-left:6em">{{ssc.id.name}}</p>
+							</div>
+							<md-icon class="material-icons" ng-click="toggleItems(item)" style="margin-left: 10px;">
+								<i class="material-icons">{{item.expanded ? 'expand_less' : 'expand_more' }}</i>
+							</md-icon>
+						</div>
+						</md-list-item>
+					</div>
+				</div>
+			</div>
+		</md-list>			
 	</md-content>		
 	<md-button id="fab_add_category" class="md-fab md-fab-bottom-right" aria-label="Add"
 	ng-click="openDialogCategory($event, '')">

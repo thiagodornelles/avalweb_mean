@@ -10,7 +10,7 @@ md-toolbar {
 }
 
 body {
-    /*background-color: #EEEEEE;*/
+    overflow-y: hidden;
 }
 
 md-content {

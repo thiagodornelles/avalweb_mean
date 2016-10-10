@@ -12,34 +12,46 @@
 			</md-subheader>
 			<div ng-repeat="c in categories">
 				<md-list-item ng-if="!c.superCategory">
-					<div layout="row">
+					<div layout="row" style="min-width:200px;">
 						<div class="md-list-item-text" layout="column">
-							<h3>{{c.name}}</h3>						
+							<h3>{{c.name}}</h3>
 						</div>
+						<md-icon class="material-icons" ng-click="openDialogCategory($event, c, categories)"
+						style="margin-left: 10px;">
+							<i class="material-icons">edit</i>
+						</md-icon>
 						<md-icon class="material-icons" ng-click="toggleItems(item)" style="margin-left: 10px;">
-							<i class="material-icons">{{item.expanded ? 'expand_less' : 'expand_more' }}</i>
+							<i class="material-icons">delete</i>
 						</md-icon>
 					</div>				
 				</md-list-item>
 				<div ng-repeat="sc in c.subCategories">
 					<md-list-item ng-if="!c.superCategory">
-						<div layout="row">
+						<div layout="row" style="min-width:200px;">
 							<div class="md-list-item-text" layout="column">					
-								<p style="padding-left:3em">{{sc.id.name}}</p>
+								<p style="padding-left:3em">{{sc._id.name}}</p>
 							</div>
+							<md-icon class="material-icons" ng-click="openDialogCategory($event, sc._id, categories)"
+							style="margin-left: 10px;">
+								<i class="material-icons">edit</i>
+							</md-icon>
 							<md-icon class="material-icons" ng-click="toggleItems(item)" style="margin-left: 10px;">
-								<i class="material-icons">{{item.expanded ? 'expand_less' : 'expand_more' }}</i>
+								<i class="material-icons">delete</i>
 							</md-icon>
 						</div>
 					</md-list-item>
-					<div ng-repeat="ssc in sc.id.subCategories">
+					<div ng-repeat="ssc in sc._id.subCategories">
 						<md-list-item ng-if="!c.superCategory">
-						<div layout="row">
+						<div layout="row" style="min-width:200px;">
 							<div class="md-list-item-text" layout="column">
-								<p style="padding-left:6em">{{ssc.id.name}}</p>
+								<p style="padding-left:6em">{{ssc._id.name}}</p>
 							</div>
+							<md-icon class="material-icons" ng-click="openDialogCategory($event, ssc._id, categories)"
+							style="margin-left: 10px;">
+								<i class="material-icons">edit</i>
+							</md-icon>
 							<md-icon class="material-icons" ng-click="toggleItems(item)" style="margin-left: 10px;">
-								<i class="material-icons">{{item.expanded ? 'expand_less' : 'expand_more' }}</i>
+								<i class="material-icons">delete</i>
 							</md-icon>
 						</div>
 						</md-list-item>
@@ -49,7 +61,7 @@
 		</md-list>			
 	</md-content>		
 	<md-button id="fab_add_category" class="md-fab md-fab-bottom-right" aria-label="Add"
-	ng-click="openDialogCategory($event, '')">
+	ng-click="openDialogCategory($event, '', categories)">
 		<i class="material-icons">add</i>
 	</md-button>		
 </div>

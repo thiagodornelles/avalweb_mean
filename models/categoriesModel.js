@@ -9,7 +9,7 @@ var categorySchema = new mongoose.Schema({
 	subCategories : [{
 		id: { type: mongoose.Schema.Types.ObjectId, ref: 'Category'}
 	}],
-	superCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'Category'}
+	superCategory: String
 });
 
 module.exports = mongoose.model('Category', categorySchema);

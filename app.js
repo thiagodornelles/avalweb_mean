@@ -40,7 +40,7 @@ passport.use(new LocalStrategy({usernameField: 'user',
     							passwordField: 'password'},
 	
 	function(username, password, done) {		
-		if (password == "123" && username == "professor"){
+		if (password == "p" && username == "p"){
 			var user = {username: username, type: 'professor'};
 			return done(null, user);
 		}

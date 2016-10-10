@@ -4,7 +4,19 @@ var path = require('path');
 var mongoose = require('mongoose');
 var categoryModel = require('../models/categoriesModel');
 var isLoggedIn = require('./baseMiddlewares');
+const util = require('util');
 
+var indexOf_Id = function(array, id){
+	var index = -1;
+	for (var i=0; i<array.length; i++) {
+		console.log(array[i]._id.toString() + ' : ' + id.toString());
+	    if (array[i]._id.toString() === id.toString()) {
+	        index = i;
+	        break;
+	    }
+	}
+	return index;
+};
 
 router.get('/', isLoggedIn, function(req, res, next){	
 	return next();
@@ -23,35 +35,47 @@ router.get('/id/:id', function(req, res, next){
 
 router.get('/search', function(req, res, next) {		
 	var query = categoryModel.find({name: new RegExp(req.query.filter, 'i')})
-	.populate({ path: 'subCategories.id',
+	.populate({ path: 'subCategories._id',
 		populate: {
-	    	path: 'subCategories.id',
+	    	path: 'subCategories._id',
 	    	model: 'Category'
 	    }
 	});	
 	query.exec(function (err, result){
+		// console.log(util.inspect(result, false, null));
 		res.json(result);
 	});
 });
 
 router.post('/', function(req, res, next) {	
-	if(req.body.name){		
+	if (req.body.name){		
 		var category = new categoryModel();
 		category.name = req.body.name;
-		for(var i = 0; i < req.body.questions.length; i++){
-			category.questions.push(req.body.questions[i]);
-		}
-		for(var i = 0; i < req.body.subCategories.length; i++){
-			category.subCategories.push(req.body.subCategories[i]);
-		}		
-		category.save(function(err) {
+		category.superCategory = req.body.superCategory;
+		category.save(function(err, cat) {
 			if (err)
 				res.send(err);
-			else
-				res.send('category saved');			
+			else {
+				//Adicionando esta categoria a sua categoria pai
+				categoryModel.findById(category.superCategory, function(err, result){
+					if(result){										
+						result.subCategories.push(cat._id);						
+						result.save(function(err) {
+							if (err){								
+								res.send(err);
+							}
+							else
+								res.send('category saved');
+						});
+					}
+					else{
+						res.send('category saved');
+					}
+				});				
+			}				
 		});		
 	}
-	else{
+	else {
 		res.send('category not saved');	
 	}
 	
@@ -61,17 +85,43 @@ router.put('/id/:id', function(req, res, next) {
 	categoryModel.findById(req.params.id, function(err, result){
 		if(req.body.name){			
 			result.name = req.body.name;
-			for(var i = 0; i < req.body.questions.length; i++){
-				result.questions[i] = req.body.questions[i];
-			}
-			for(var i = 0; i < req.body.subCategories.length; i++){
-				result.subCategories[i] = req.body.subCategories[i];
-			}
+			var prevSuperCategory = result.superCategory;
+			result.superCategory = req.body.superCategory;
 			result.save(function(err) {
-				if (err)
-					res.send(err);
-				else
+			if (err)
+				res.send(err);
+			else{
+				//Super categoria não mudou
+				if(prevSuperCategory === req.body.superCategory){
 					res.send('category saved');
+				}				
+				else{
+					//Remover a categoria pai antiga
+					categoryModel.findById(prevSuperCategory, function(err, result2){
+						if (result2){
+							var index = indexOf_Id(result2.subCategories, req.params.id);								
+							if (index > -1) {
+							    result2.subCategories.splice(index, 1);
+							}								
+							result2.save(function(err) {
+								if (err)
+									res.send(err);							
+							});
+						}
+					});
+					//Adicionar na categoria pai nova
+					categoryModel.findById(req.body.superCategory, function(err, result2){
+						if (result2){
+							result2.subCategories.push(req.params.id);
+							result2.save(function(err) {
+								if (err)
+									res.send(err);							
+							});
+						}
+					});
+					res.send('category saved');
+				}
+			}				
 			});
 		}
 		else{

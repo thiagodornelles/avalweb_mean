@@ -33,7 +33,8 @@ router.post('/', function(req, res, next) {
 		var student = new studentModel();
 		student.name = req.body.name;
 		student.birthDate = req.body.birthDate;
-		student.photo = new Buffer(0);		
+		student.photo = new Buffer(0);
+		student.email = req.body.email;
 		student.save(function(err) {
 			if (err)
 				res.send(err);
@@ -53,6 +54,7 @@ router.put('/id/:id', function(req, res, next) {
 			result.name = req.body.name;
 			result.birthDate = req.body.birthDate;
 			result.photo = new Buffer(0);
+			result.email = req.body.email;
 			result.save(function(err) {
 				if (err)
 					res.send(err);

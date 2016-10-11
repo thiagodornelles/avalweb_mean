@@ -5,8 +5,11 @@ var mongoose = require('mongoose');
 var testModel = require('../models/testsModel');
 var studentTestModel = require('../models/studentTestsModel');
 var questionModel = require('../models/questionsModel');
+var categoryModel = require('../models/categoriesModel');
+var CONSTS = require('../constants');
 var isLoggedIn = require('./baseMiddlewares');
 var TestStrategy = require('../testStrategy');
+const util = require('util');
 
 /* 
  * -----------------------------------------------------------------------------------
@@ -23,13 +26,7 @@ var DefaultStrategy = function(){
 	this.nextQuestion = function(answer, questions){		
 		if(questions.length == 0){
 			return "end of test";
-		}
-
-		//Ordenando pela prioridade
-		questions.sort(function(a, b){			
-			return a.priority - b.priority;
-		});
-		
+		}		
 		return questions[0];
 	}
 };
@@ -114,31 +111,64 @@ router.get('/search', function(req, res, next) {
 router.post('/starttest', function(req, res, next) {	
 	//Validando se o teste existe	
 	var query = testModel.findById(req.body._id)	
-	.populate({ path: 'questions.id', select: '-answers.feedback -answers.rightAnswer' });
+	.populate({ path: 'questions', select: '-answers.feedback -answers.rightAnswer' });
 
 	query.exec(function(err, result){
 		if (err)
 			res.send(err);
-		else{
-			if(result.strategy == 'fixed_order')
+		else{			
+			if (result.strategy == CONSTS.FIXED_ORDER)
 				testStrat.setStrategy(def);
-			else if(result.strategy == 'dif_balance')
+			else if (result.strategy == CONSTS.DIF_BALANCE)
 				testStrat.setStrategy(difBalance);
 
 			//Se existe, grava a informação do usuário no log da prova
 			if (result._id == req.body._id){				
 				//Solicita uma questão para começar.
-				var question = testStrat.nextQuestion('', result.questions);				
-				var studTest = new studentTestModel();				
-				studTest.user = req.session.passport.user.username;
-				studTest.test = req.body._id;
-				studTest.date = new Date();				
-				studTest.questionsAnswered.push(question.id._id);
-				studTest.save();
+				var question;				
+				if (result.type == CONSTS.EVAL_BY_CATEGORIES){
+					if(result.categories.length > 0){						
+						var q = categoryModel.findById(result.categories[0]).populate('questions');
+						q.exec(function(err, category){
+							// console.log(err);
+							// console.log(util.inspect(category, false, null));
+							if(category.questions.length > 0){
+								question = testStrat.nextQuestion('', category.questions);								
+								var studTest = new studentTestModel();
+								studTest.user = req.session.passport.user.username;
+								studTest.test = req.body._id;
+								studTest.date = new Date();
+								studTest.questionsAnswered.push(question._id);
+								studTest.save();
 
-				req.session.passport.user.test = studTest._id;
-				//Envia a questão
-				res.send(question.id);
+								req.session.passport.user.test = studTest._id;
+								//Envia a questão
+								console.log(question);
+								res.send(question);
+							}
+							else{
+								res.send("end of test");
+							}
+						});
+					}
+					else{
+						res.send("end of test");
+					}
+				}
+				else if (result.type == CONSTS.EVAL_BY_QUESTIONS){
+					question = testStrat.nextQuestion('', result.questions);			
+					var studTest = new studentTestModel();
+					studTest.user = req.session.passport.user.username;
+					studTest.test = req.body._id;
+					studTest.date = new Date();
+					studTest.questionsAnswered.push(question._id);
+					studTest.save();
+
+					req.session.passport.user.test = studTest._id;
+					//Envia a questão
+					console.log(question);
+					res.send(question);
+				}
 			}
 			else{
 				res.send('test not started');
@@ -210,17 +240,16 @@ router.post('/nextquestion', function(req, res, next) {
 			if (studTest.length > 0){
 				//Busca os dados das questões da avaliação
 				testModel.findById(req.body._id)
-				.populate({ path: 'questions.id' })				
+				.populate({ path: 'questions' })				
 				.exec(function(err, test){
 					if (test){
 						//Selecionando a estratégia
-						if(test.strategy == 'fixed_order')
+						if(test.strategy == CONSTS.FIXED_ORDER)
 							testStrat.setStrategy(def);
-						else if(test.strategy == 'dif_balance')
+						else if(test.strategy == CONSTS.DIF_BALANCE)
 							testStrat.setStrategy(difBalance);
 					
 						// console.log(test.strategy);
-
 						var qtemp = test.questions;						
 						//Verificar se o aluno acertou a última questão respondida
 						answered = studTest[0].questionsAnswered;
@@ -243,7 +272,7 @@ router.post('/nextquestion', function(req, res, next) {
 							var questionsAns = studTest[0].questionsAnswered;
 							for (var i = qtemp.length-1 ; i > -1; i--){
 								for (var j = 0; j < questionsAns.length; j++){									
-									if (questionsAns[j].toString() == qtemp[i].id._id.toString()){
+									if (questionsAns[j].toString() == qtemp[i]._id.toString()){
 										qtemp.splice(i, 1);
 										break;		
 									}
@@ -259,9 +288,9 @@ router.post('/nextquestion', function(req, res, next) {
 							}
 							else {
 								//Grava nova questão a responder
-								studTest[0].questionsAnswered.push(question.id._id);
+								studTest[0].questionsAnswered.push(question._id);
 								studTest[0].save();
-								res.send(question.id);
+								res.send(question);
 							}
 						});
 					}

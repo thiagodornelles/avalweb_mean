@@ -11,7 +11,7 @@
 				{{questions.length}} resultados
 			</md-subheader>			
 			<md-list-item id="{{q._id}}" flex class="list-item" ng-repeat="q in questions"
-				ng-click="openDialogQuestion($event, q)">
+				ng-click="openDialogQuestion($event, q, categories)">
 				<div class="md-list-item-text" layout="column">					
 					<h3>{{q.subject}}</h3>
 					<p>{{q.wording}}</p>						
@@ -32,7 +32,7 @@
 		</md-list>
 	</md-content>		
 	<md-button id="fab_add_question" class="md-fab md-fab-bottom-right" aria-label="Add"
-	ng-click="openDialogQuestion($event, '')">
+	ng-click="openDialogQuestion($event, '', categories)">
 		<i class="material-icons">add</i>
 	</md-button>		
 </div>

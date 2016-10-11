@@ -54,7 +54,7 @@ app.controller("testController", function($scope, $http, $mdDialog, $mdMedia, $m
 					$mdToast.show($mdToast.simple()
 					.textContent('Avaliação removida com sucesso')
 					.position('bottom left')
-					.hideDelay(3000));			
+					.hideDelay(3000));
 				}
 				else{
 					$mdToast.show($mdToast.simple()	        				
@@ -70,39 +70,35 @@ app.controller("testController", function($scope, $http, $mdDialog, $mdMedia, $m
 
 //Fim do controlador
 
-var testDialogController = function($scope, $mdDialog, $http, $mdToast, $mdMedia, test) {		
-	$scope.test = angular.copy(test);
+var testDialogController = function($scope, $mdDialog, $http, $mdToast, $mdMedia, test) {
 	$scope.useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));
-	
+	$scope.test = angular.copy(test);
 	if($scope.test == ''){
 		//Cria um objeto test caso venha um string
-		$scope.test = {};
-		$scope.test.questions = [];
-		$scope.test.date = new Date();
+		$scope.test = new Object();		
+		$scope.test.date = new Date();		
+		$scope.test.selectedCategories = new Array();
+		$scope.test.selectedQuestions = new Array();
+		$scope.test.type = 1;
 	}
-	else{		
+	else{
 		$scope.test.date = new Date($scope.test.date);
+		$scope.test.selectedCategories = $scope.test.categories;
+		$scope.test.selectedQuestions = $scope.test.questions;
+		$scope.test.type = $scope.test.type;
 	}
 
 	$scope.refreshList = function(filter){
+		$http.get('/categories/search')
+		.then(function(res){
+			$scope.categories = res.data;
+		},
+		function(res){
+			$scope.categories = [];
+		});
 		$http.get('/questions/search')
 		.then(function(res){
-			$scope.questions = res.data;
-			console.log($scope.test);
-			console.log($scope.questions);
-			//Setting all questions false for undefined field adjustment
-			for(var j = 0; j < $scope.questions.length; j++){
-				$scope.questions[j].selected = false;
-			}
-			//Verifies which questions are selected
-			for(var i = 0; i < $scope.test.questions.length; i++){				
-				for(var j = 0; j < $scope.questions.length; j++){					
-					if($scope.questions[j]._id == $scope.test.questions[i].id){
-						$scope.questions[j].selected = true;
-						$scope.questions[j].priority = $scope.test.questions[i].priority;
-					}
-				}
-			}
+			$scope.questions = res.data;			
 		},
 		function(res){
 			$scope.questions = [];
@@ -116,18 +112,10 @@ var testDialogController = function($scope, $mdDialog, $http, $mdToast, $mdMedia
 		$mdDialog.cancel();		
 	};
 
-	$scope.saveTest = function(event, id){				
+	$scope.saveTest = function(event, id){	
+		//POST
 		if(!id){
-			//Populate with selected students			
-			$scope.test.questions = [];
-			for (var i = 0; i < $scope.questions.length; i++) {
-				if($scope.questions[i].selected){
-					var obj = {};
-					obj.priority = $scope.questions[i].priority;
-					obj.id = $scope.questions[i]._id;
-					$scope.test.questions.push(obj);
-				}		
-			};		
+			console.log($scope.test);	
 			$http({
 				method: 'POST',
 				url: './tests',				
@@ -149,17 +137,7 @@ var testDialogController = function($scope, $mdDialog, $http, $mdToast, $mdMedia
 				}
 			});
 		}
-		else{
-			//Populate with selected students			
-			$scope.test.questions = [];
-			for (var i = 0; i < $scope.questions.length; i++) {
-				if($scope.questions[i].selected){
-					var obj = {};
-					obj.priority = $scope.questions[i].priority;
-					obj.id = $scope.questions[i]._id;
-					$scope.test.questions.push(obj);
-				}		
-			};					
+		else{			
 			$http({
 				method: 'PUT',
 				url: './tests/id/'+ $scope.test._id,				
@@ -182,4 +160,61 @@ var testDialogController = function($scope, $mdDialog, $http, $mdToast, $mdMedia
 			});	
 		}
 	};
+
+	$scope.addCategoryToTest = function(category){
+		category = angular.copy(category);		
+		$scope.test.selectedCategories.push(category);
+	};
+	$scope.removeCategoryFromTest = function(category){		
+		var index = $scope.test.selectedCategories.indexOf(category);
+		if(index > -1){
+			$scope.test.selectedCategories.splice(index, 1);
+		}
+	};
+	$scope.upCategory = function(category){
+		var index = $scope.test.selectedCategories.indexOf(category);
+		//Primeiro elemento não troca
+		if(index > 0){
+			var t = $scope.test.selectedCategories[index-1];
+			$scope.test.selectedCategories[index-1] = $scope.test.selectedCategories[index];
+			$scope.test.selectedCategories[index] = t;
+		}
+	}
+	$scope.downCategory = function(category){
+		var index = $scope.test.selectedCategories.indexOf(category);
+		//Primeiro elemento não troca
+		if(index < $scope.test.selectedCategories.length-1){
+			var t = $scope.test.selectedCategories[index+1];
+			$scope.test.selectedCategories[index+1] = $scope.test.selectedCategories[index];
+			$scope.test.selectedCategories[index] = t;
+		}
+	}
+	$scope.addQuestionToTest = function(question){
+		question = angular.copy(question);		
+		$scope.test.selectedQuestions.push(question);
+	};
+	$scope.removeQuestionFromTest = function(question){		
+		var index = $scope.test.selectedQuestions.indexOf(question);
+		if(index > -1){
+			$scope.test.selectedQuestions.splice(index, 1);
+		}
+	};
+	$scope.upQuestion = function(question){
+		var index = $scope.test.selectedQuestions.indexOf(question);
+		//Primeiro elemento não troca
+		if(index > 0){
+			var t = $scope.test.selectedQuestions[index-1];
+			$scope.test.selectedQuestions[index-1] = $scope.test.selectedQuestions[index];
+			$scope.test.selectedQuestions[index] = t;
+		}
+	}
+	$scope.downQuestion = function(question){
+		var index = $scope.test.selectedQuestions.indexOf(question);
+		//Primeiro elemento não troca
+		if(index < $scope.test.selectedQuestions.length-1){
+			var t = $scope.test.selectedQuestions[index+1];
+			$scope.test.selectedQuestions[index+1] = $scope.test.selectedQuestions[index];
+			$scope.test.selectedQuestions[index] = t;
+		}
+	}
 }		

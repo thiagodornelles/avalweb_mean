@@ -18,7 +18,7 @@ app.controller("classController", function($scope, $http, $mdDialog, $mdMedia, $
 	$scope.refreshList();	
 
 	$scope.openDialogClass = function(ev, q){
-		var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));				
+		var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));
 		$mdDialog.show({
 			controller: classDialogController,
 			templateUrl: './classDialog.html',

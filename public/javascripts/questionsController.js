@@ -7,7 +7,14 @@ app.controller("questionController", function($scope, $http, $mdDialog, $mdMedia
 	$scope.refreshList = function(){
 		$http.get('/questions/search')
 		.then(function(res){
-			$scope.questions = res.data;					
+			$scope.questions = res.data;
+			$http.get('/categories/search')
+			.then(function(res){
+				$scope.categories = res.data;
+			},
+			function(res){
+				$scope.categories = [];
+			});
 		},
 		function(res){
 			$scope.questions = [];				
@@ -17,14 +24,15 @@ app.controller("questionController", function($scope, $http, $mdDialog, $mdMedia
 	//carregando dados
 	$scope.refreshList();
 
-	$scope.openDialogQuestion = function(ev, q){				
+	$scope.openDialogQuestion = function(ev, q, cats){				
 		var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));				
 		$mdDialog.show({
 			controller: questionDialogController,
 			templateUrl: './questionDialog.html',
 			parent: angular.element(document.body),
 			locals:{
-				question: q
+				question: q,
+				categories: cats
 			},
 			targetEvent: ev,					
 			clickOutsideToClose: true,
@@ -71,8 +79,9 @@ app.controller("questionController", function($scope, $http, $mdDialog, $mdMedia
 
 //Fim do controlador
 
-var questionDialogController = function($scope, $mdDialog, $http, $mdToast, question) {		
-	$scope.question = angular.copy(question);	
+var questionDialogController = function($scope, $mdDialog, $http, $mdToast, question, categories) {		
+	$scope.question = angular.copy(question);
+	$scope.categories = angular.copy(categories);
 
 	$scope.cancel = function() {
 		$mdDialog.cancel();

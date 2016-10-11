@@ -139,7 +139,7 @@ legend {
 fieldset.standard {
 	border-style: solid;
 	border-width: 1px;
-	margin: 0 0 10 0;	
+	margin: 0 5 10 5;	
 }
 
 .md-dialog-fullscreen {
@@ -172,4 +172,9 @@ fieldset.standard {
  	direction: ltr;
  	-webkit-font-feature-settings: 'liga';
  	-webkit-font-smoothing: antialiased;
+}
+
+.small-button{
+	min-width: 32px;
+	width: 32px;
 }

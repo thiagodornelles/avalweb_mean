@@ -40,7 +40,7 @@ app.controller("categoryController", function($scope, $http, $mdDialog, $mdMedia
 		);
 	}
 
-	$scope.removeCategory = function(ev, id){				
+	$scope.removeCategory = function(ev, id){		
 		var confirm = $mdDialog.confirm()
 		.title('Remover?')
 		.textContent('Tem certeza que deseja remover esta categoria?')
@@ -76,6 +76,7 @@ var categoryDialogController = function($scope, $mdDialog, $http, $mdToast, cate
 	$scope.category = angular.copy(category);
 	$scope.categories = angular.copy(categories);
 
+	var toRemove = new Array();
 	if (category != ''){
 		//Remover a categoria propria categoria para evitar autoreferencia infinita	
 		for (var i = 0; i < categories.length; i++) {
@@ -83,11 +84,9 @@ var categoryDialogController = function($scope, $mdDialog, $http, $mdToast, cate
 				$scope.categories.splice(i, 1);
 				break;
 			}
-		}
-
+		}	
 		//Evitar adição a subcategoria propria	
-		//Pegar as subcategorias para remover
-		var toRemove = new Array();
+		//Pegar as subcategorias para remover		
 		for (var i = 0; i < category.subCategories.length; i++) {
 			for (var j = 0; j < categories.length; j++) {			
 				if (category.subCategories[i]._id._id.toString() == categories[j]._id.toString()){				
@@ -98,31 +97,30 @@ var categoryDialogController = function($scope, $mdDialog, $http, $mdToast, cate
 					break;
 				}
 			}
-		}	
-		//Categorias folha não podem ter categorias penduradas
-		for (var i = 0; i < categories.length; i++) {		
-			for (var j = 0; j < categories[i].subCategories.length; j++) {
-				for (var k = 0; k < categories[i].subCategories[j]._id.subCategories.length; k++) {					
-					toRemove.push(categories[i].subCategories[j]._id.subCategories[k]._id._id);
-				};			
-			}
 		}
-
-		//Gerar array sem as subcategorias próprias
-		var tempCategories = new Array();
-		for (var i = 0; i < $scope.categories.length; i++) {
-			var found = false;
-			for (var j = 0; j < toRemove.length; j++) {			
-				if($scope.categories[i]._id.toString() == toRemove[j]){
-					found = true;				
-					break;
-				}
-			}
-			if(!found)
-				tempCategories.push($scope.categories[i]);
-		}
-		$scope.categories = tempCategories;
 	}	
+	//Categorias folha (altura 3) não podem ter categorias penduradas
+	for (var i = 0; i < categories.length; i++) {		
+		for (var j = 0; j < categories[i].subCategories.length; j++) {
+			for (var k = 0; k < categories[i].subCategories[j]._id.subCategories.length; k++) {					
+				toRemove.push(categories[i].subCategories[j]._id.subCategories[k]._id._id);
+			};			
+		}
+	}
+	//Gerar array sem as subcategorias próprias
+	var tempCategories = new Array();
+	for (var i = 0; i < $scope.categories.length; i++) {
+		var found = false;
+		for (var j = 0; j < toRemove.length; j++) {			
+			if($scope.categories[i]._id.toString() == toRemove[j]){
+				found = true;				
+				break;
+			}
+		}
+		if(!found)
+			tempCategories.push($scope.categories[i]);
+	}
+	$scope.categories = tempCategories;
 
 	$scope.cancel = function() {
 		$mdDialog.cancel();

@@ -8,9 +8,9 @@ const util = require('util');
 
 var indexOf_Id = function(array, id){
 	var index = -1;
-	for (var i=0; i<array.length; i++) {
-		console.log(array[i]._id.toString() + ' : ' + id.toString());
-	    if (array[i]._id.toString() === id.toString()) {
+	for (var i = 0; i < array.length; i++) {
+		console.log(array[i]._id.toString() + ':' + id.toString());
+	    if (array[i]._id.toString() == id.toString()) {
 	        index = i;
 	        break;
 	    }
@@ -133,11 +133,42 @@ router.put('/id/:id', function(req, res, next) {
 
 router.delete('/id/:id', function(req, res, next) {	
 	var removeQuery = categoryModel.findByIdAndRemove(req.params.id);
-	removeQuery.exec(function(err) {
-		if (err)
-			res.send(err);
-		else{
+	removeQuery.exec(function(err, result) {
+		if(result){
+			//Removendo as subcategorias se existirem
+			if(result.subCategories.length > 0){
+				for (var i = 0; i < result.subCategories.length; i++) {
+					var removeQuery2 = categoryModel.findByIdAndRemove(result.subCategories[i]._id);
+					removeQuery2.exec(function(err, result2){
+						if(result2.subCategories.length > 0){
+							for (var i = 0; i < result2.subCategories.length; i++) {
+								categoryModel.findByIdAndRemove(result2.subCategories[i]._id,
+								function(err, result3){
+								});
+							}
+						}					
+					});
+				}
+			}
+			//Removendo a sua referência de sua supercategoria se existe
+			if(result.superCategory != ''){
+				categoryModel.findById(result.superCategory,
+					function(err, result){
+						if(result){
+							console.log(result);
+							var index = indexOf_Id(result.subCategories, req.params.id);
+							console.log(index);
+							if(index > -1){
+								result.subCategories.splice(index, 1);
+							}
+							result.save();
+						}
+				});
+			}
 			res.send('category removed');
+		}
+		else{
+			res.send('category not found');
 		}
 	});	
 });

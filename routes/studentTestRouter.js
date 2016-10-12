@@ -9,6 +9,8 @@ var categoryModel = require('../models/categoriesModel');
 var CONSTS = require('../constants');
 var isLoggedIn = require('./baseMiddlewares');
 var TestStrategy = require('../testStrategy');
+var BalanceStrategy = require('./balanceStrategy');
+var StudentTestUtils = require('./studentTestUtils');
 const util = require('util');
 
 /* 
@@ -33,45 +35,6 @@ var DefaultStrategy = function(){
 };
 //Instanciamos esta estrategia
 var def = new DefaultStrategy();
-
-var BalanceStrategy = function(){	
-	this.nextQuestion = function(answer, questions){		
-		if(questions.length == 0){
-			return "end of test";
-		}
-		// console.log(answer);
-		//Teste iniciando... Seleciona uma questão difícil
-		if(answer === ''){
-			//Ordenando pela dificuldade, retorna a mais difícil
-			questions.sort(function(a, b){
-				return b.id.difficulty - a.id.difficulty;
-			});			
-			console.log("Iniciando");
-			console.log(questions[0]);			
-			return questions[0];
-		}		
-		//Acertou a última questao
-		else if(answer){
-			//Ordenando pela dificuldade, retorna a mais difícil			
-			questions.sort(function(a, b){
-				return b.id.difficulty - a.id.difficulty;
-			});			
-			console.log("Questao mais dificil");
-			console.log(questions[0]);
-			return questions[0];
-		}
-		else if(!answer){
-			//Ordenando pela dificuldade, retorna a mais fácil			
-			questions.sort(function(a, b){				
-				return a.id.difficulty - b.id.difficulty;
-			});			
-			console.log("Questao mais facil");
-			console.log(questions[0]);
-			return questions[0];
-		}		
-		return questions[0];
-	}
-};
 var difBalance = new BalanceStrategy();
 
 //Setamos nossa estrategia padrão no objeto que gerencia a escolhas das questões
@@ -82,6 +45,10 @@ testStrat.setStrategy(def);
  * FIM -- Código referente a geração de uma estrategia de aplicação de avaliação
  * -----------------------------------------------------------------------------------
  */
+
+
+//Funçoes de utilidade
+var stUtil = new StudentTestUtils();
 
 router.get('/', isLoggedIn, function(req, res, next){
 	return next();
@@ -132,42 +99,36 @@ router.post('/starttest', function(req, res, next) {
 						//Popular três niveis de subCategorias e suas questões
 						var q = categoryModel.findById(result.categories[0])
 						.populate(
-							{path:'subCategories._id', model:'Category',
-							populate: {path:'subCategories._id', model:'Category'}
+							{path:'subCategories', model:'Category',
+							populate: {path:'subCategories', model:'Category'}
 						})
 						.lean();
 						q.exec(function(err, category){
 							categoryModel.populate(category,
-								{ path:'questions._id subCategories._id.questions._id subCategories._id.subCategories._id.questions._id',
+								{ path:'questions subCategories.questions subCategories.subCategories.questions',
 								  model:'Question', options: { lean: true }},								
 								function(err, category){									
-									//Juntando as questões em um único array (category.questions)									
-									for (var i = 0; i < category.subCategories.length; i++) {
-										var subs = category.subCategories[i]._id.subCategories;										
-										for (var j = 0; j < subs.length; j++) {											
-											category.questions = category.questions.concat(subs[j]._id.questions);
-										};
-										category.questions = category.questions.concat(category.subCategories[i]._id.questions);
-									};									
-									console.log(util.inspect(category.questions, false, null));
-								}
-							);
-							if(category.questions.length > 0){
-								question = testStrat.nextQuestion('', category.questions);								
-								var studTest = new studentTestModel();
-								studTest.user = req.session.passport.user.username;
-								studTest.test = req.body._id;
-								studTest.date = new Date();
-								studTest.questionsAnswered.push(question._id);
-								studTest.save();
+									//Pega as questões na hierarquia
+									category.questions = stUtil.getQuestionsFromCategory(category);
 
-								req.session.passport.user.test = studTest._id;
-								//Envia a questão								
-								res.send(question);
-							}
-							else{
-								res.send("end of test");
-							}
+									if(category.questions.length > 0){
+										question = testStrat.nextQuestion('', category.questions);								
+										var studTest = new studentTestModel();
+										studTest.user = req.session.passport.user.username;
+										studTest.test = req.body._id;
+										studTest.date = new Date();
+										studTest.questionsAnswered.push(question);
+										studTest.save();
+
+										req.session.passport.user.test = studTest._id;
+										//Envia a questão								
+										res.send(question);
+									}
+									else{
+										res.send("end of test");
+									}
+								}
+							);							
 						});
 					}
 					else{
@@ -185,7 +146,7 @@ router.post('/starttest', function(req, res, next) {
 
 					req.session.passport.user.test = studTest._id;
 					//Envia a questão
-					console.log(question);
+					// console.log(question);
 					res.send(question);
 				}
 			}
@@ -251,25 +212,22 @@ router.post('/nextquestion', function(req, res, next) {
 			'user': req.session.passport.user.username,
 			'test': req.body._id //ID da avaliação
 		})
-		.limit(1)
-		.sort({ 'date': -1 })
-
+		.limit(1).sort({ 'date': -1 })
 		.exec(function(err, studTest){
 			//Validando se encontrou registro de avaliação para este usuário
 			// console.log(studTest);
 			if (studTest.length > 0){
 				//Busca os dados das questões da avaliação
-				testModel.findById(req.body._id)
-				.populate({ path: 'questions' })				
+				testModel.findById(req.body._id).populate({ path: 'questions categories' })				
 				.exec(function(err, test){
-					if (test){
+					//console.log(test);
+					if(test){
 						//Selecionando a estratégia
 						if(test.strategy == CONSTS.FIXED_ORDER)
 							testStrat.setStrategy(def);
 						else if(test.strategy == CONSTS.DIF_BALANCE)
 							testStrat.setStrategy(difBalance);
-					
-						// console.log(test.strategy);
+
 						var qtemp = test.questions;						
 						//Verificar se o aluno acertou a última questão respondida
 						answered = studTest[0].questionsAnswered;
@@ -287,30 +245,46 @@ router.post('/nextquestion', function(req, res, next) {
 									break;
 								}
 							}
-							//Remoção das questões já respondidas
-							//As questões não respondidas serão avaliadas pelo seletor de questões
-							var questionsAns = studTest[0].questionsAnswered;
-							for (var i = qtemp.length-1 ; i > -1; i--){
-								for (var j = 0; j < questionsAns.length; j++){									
-									if (questionsAns[j].toString() == qtemp[i]._id.toString()){
-										qtemp.splice(i, 1);
-										break;		
+							//----------------------
+							//  PROVA POR QUESTOES
+							//----------------------
+							if (test.type == CONSTS.EVAL_BY_QUESTIONS){
+								//Remoção das questões já respondidas
+								//As questões não respondidas serão avaliadas pelo seletor de questões
+								var questionsAns = studTest[0].questionsAnswered;
+								for (var i = qtemp.length-1 ; i > -1; i--){
+									for (var j = 0; j < questionsAns.length; j++){									
+										if (questionsAns[j].toString() == qtemp[i]._id.toString()){
+											qtemp.splice(i, 1);
+											break;		
+										}
 									}
 								}
+								//**** Buscando nova questão *****							
+								var question = testStrat.nextQuestion(rightAnswer, qtemp);							
+								
+								//String que termina o teste
+								if (question == 'end of test') {								
+									res.send(question);
+								}
+								else {
+									//Grava nova questão a responder
+									studTest[0].questionsAnswered.push(question._id);
+									studTest[0].save();
+									res.send(question);
+								}
 							}
+							//----------------------
+							// PROVA POR CATEGORIAS
+							//----------------------							
+							else if (test.type == CONSTS.EVAL_BY_CATEGORIES){
+								var cats = test.categories;
+								category.questions = stUtil.getQuestionsFromCategory(cats);
+								console.log(category.questions);
+								var question = testStrat.nextQuestion(rightAnswer, qtemp);
 
-							//**** Buscando nova questão *****							
-							var question = testStrat.nextQuestion(rightAnswer, qtemp);							
-							
-							//String que termina o teste
-							if (question == 'end of test') {								
-								res.send(question);
-							}
-							else {
-								//Grava nova questão a responder
-								studTest[0].questionsAnswered.push(question._id);
-								studTest[0].save();
-								res.send(question);
+								res.send("end of test");							
+								
 							}
 						});
 					}

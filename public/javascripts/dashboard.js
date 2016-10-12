@@ -84,7 +84,11 @@ app.config(['$routeProvider', '$locationProvider',
 		})
 		.when('/studenttests', {
 			templateUrl: './studentTestList.html',
-			controller: 'studentTestController'			
+			controller: 'studentTestController'		
+		})
+		.when('/invite', {
+			templateUrl: './invite.html',
+			controller: 'invitesController'	
 		});
 		
 	$locationProvider.html5Mode(true);

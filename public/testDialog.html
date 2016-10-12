@@ -103,7 +103,7 @@
 	          				<md-option value="">
 								Sem filtro
 							</md-option>
-							<md-option value="{{c.name}}" ng-repeat="c in categories">
+							<md-option value="{{c._id}}" ng-repeat="c in categories">
 								{{c.name}}
 							</md-option>
 						</md-select>
@@ -111,8 +111,8 @@
 					<md-content>
 						<md-list flex>
 							<md-list-item id="{{q._id}}"
-							ng-repeat="q in questions |filter:search|
-							           filter:filter_category| orderBy:['wording']" flex>
+							ng-repeat="q in questions | filter:search |
+							           filter:filter_category | orderBy:['wording']" flex>
 								<div class="md-list-item-text" layout="column"
 								style="min-width: 100px;">
 									<p>{{q.wording | limitTo: 100}}</p>

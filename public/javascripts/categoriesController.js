@@ -89,9 +89,9 @@ var categoryDialogController = function($scope, $mdDialog, $http, $mdToast, cate
 		//Pegar as subcategorias para remover		
 		for (var i = 0; i < category.subCategories.length; i++) {
 			for (var j = 0; j < categories.length; j++) {			
-				if (category.subCategories[i]._id._id.toString() == categories[j]._id.toString()){				
+				if (category.subCategories[i]._id.toString() == categories[j].toString()){				
 					for (var k = 0; k < category.subCategories[i]._id.subCategories.length; k++) {					
-						toRemove.push(category.subCategories[i]._id.subCategories[k]._id._id);					
+						toRemove.push(category.subCategories[i].subCategories[k]._id);					
 					};				
 					toRemove.push(category.subCategories[i]._id._id);
 					break;
@@ -102,8 +102,8 @@ var categoryDialogController = function($scope, $mdDialog, $http, $mdToast, cate
 	//Categorias folha (altura 3) não podem ter categorias penduradas
 	for (var i = 0; i < categories.length; i++) {		
 		for (var j = 0; j < categories[i].subCategories.length; j++) {
-			for (var k = 0; k < categories[i].subCategories[j]._id.subCategories.length; k++) {					
-				toRemove.push(categories[i].subCategories[j]._id.subCategories[k]._id._id);
+			for (var k = 0; k < categories[i].subCategories[j].subCategories.length; k++) {					
+				toRemove.push(categories[i].subCategories[j].subCategories[k]._id);
 			};			
 		}
 	}

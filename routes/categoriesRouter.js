@@ -9,8 +9,8 @@ const util = require('util');
 var indexOf_Id = function(array, id){
 	var index = -1;
 	for (var i = 0; i < array.length; i++) {
-		console.log(array[i]._id.toString() + ':' + id.toString());
-	    if (array[i]._id.toString() == id.toString()) {
+		console.log(array[i].toString() + ':' + id.toString());
+	    if (array[i].toString() == id.toString()) {
 	        index = i;
 	        break;
 	    }
@@ -35,14 +35,14 @@ router.get('/id/:id', function(req, res, next){
 
 router.get('/search', function(req, res, next) {		
 	var query = categoryModel.find({name: new RegExp(req.query.filter, 'i')})
-	.populate({ path: 'subCategories._id',
+	.populate({ path: 'subCategories',
 		populate: {
-	    	path: 'subCategories._id',
+	    	path: 'subCategories',
 	    	model: 'Category'
 	    }
 	});	
-	query.exec(function (err, result){
-		// console.log(util.inspect(result, false, null));
+	query.lean().exec(function (err, result){
+		console.log(util.inspect(result, false, null));
 		res.json(result);
 	});
 });
@@ -59,7 +59,7 @@ router.post('/', function(req, res, next) {
 				//Adicionando esta categoria a sua categoria pai
 				categoryModel.findById(category.superCategory, function(err, result){
 					if(result){										
-						result.subCategories.push(cat._id);						
+						result.subCategories.push(cat);
 						result.save(function(err) {
 							if (err){								
 								res.send(err);
@@ -72,18 +72,17 @@ router.post('/', function(req, res, next) {
 						res.send('category saved');
 					}
 				});				
-			}				
-		});		
+			}
+		});
 	}
 	else {
-		res.send('category not saved');	
-	}
-	
+		res.send('category not saved');
+	}	
 });
 
 router.put('/id/:id', function(req, res, next) {	
 	categoryModel.findById(req.params.id, function(err, result){
-		if(req.body.name){			
+		if(req.body.name){
 			result.name = req.body.name;
 			var prevSuperCategory = result.superCategory;
 			result.superCategory = req.body.superCategory;

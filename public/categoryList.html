@@ -20,7 +20,7 @@
 						style="margin-left: 10px;">
 							<i class="material-icons">edit</i>
 						</md-icon>
-						<md-icon class="material-icons" ng-click="removeCategory($event, c._id)"
+						<md-icon class="material-icons" ng-click="removeCategory($event, c)"
 						style="margin-left: 10px;">
 							<i class="material-icons">delete</i>
 						</md-icon>
@@ -30,29 +30,29 @@
 					<md-list-item ng-if="!c.superCategory">
 						<div layout="row" style="min-width:200px;">
 							<div class="md-list-item-text" layout="column">					
-								<p style="padding-left:3em">{{sc._id.name}}</p>
+								<p style="padding-left:3em">{{sc.name}}</p>
 							</div>
-							<md-icon class="material-icons" ng-click="openDialogCategory($event, sc._id, categories)"
+							<md-icon class="material-icons" ng-click="openDialogCategory($event, sc, categories)"
 							style="margin-left: 10px;">
 								<i class="material-icons">edit</i>
 							</md-icon>
-							<md-icon class="material-icons" ng-click="removeCategory($event, sc._id._id)"
+							<md-icon class="material-icons" ng-click="removeCategory($event, sc._id)"
 							style="margin-left: 10px;">
 								<i class="material-icons">delete</i>
 							</md-icon>
 						</div>
 					</md-list-item>
-					<div ng-repeat="ssc in sc._id.subCategories">
+					<div ng-repeat="ssc in sc.subCategories">
 						<md-list-item ng-if="!c.superCategory">
 						<div layout="row" style="min-width:200px;">
 							<div class="md-list-item-text" layout="column">
-								<p style="padding-left:6em">{{ssc._id.name}}</p>
+								<p style="padding-left:6em">{{ssc.name}}</p>
 							</div>
-							<md-icon class="material-icons" ng-click="openDialogCategory($event, ssc._id, categories)"
+							<md-icon class="material-icons" ng-click="openDialogCategory($event, ssc, categories)"
 							style="margin-left: 10px;">
 								<i class="material-icons">edit</i>
 							</md-icon>
-							<md-icon class="material-icons" ng-click="removeCategory($event, ssc._id._id)"
+							<md-icon class="material-icons" ng-click="removeCategory($event, ssc._id)"
 							style="margin-left: 10px;">
 								<i class="material-icons">delete</i>
 							</md-icon>

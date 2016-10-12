@@ -26,7 +26,8 @@ var DefaultStrategy = function(){
 	this.nextQuestion = function(answer, questions){		
 		if(questions.length == 0){
 			return "end of test";
-		}		
+		}
+		// console.log(questions);
 		return questions[0];
 	}
 };
@@ -38,7 +39,7 @@ var BalanceStrategy = function(){
 		if(questions.length == 0){
 			return "end of test";
 		}
-		console.log(answer);
+		// console.log(answer);
 		//Teste iniciando... Seleciona uma questão difícil
 		if(answer === ''){
 			//Ordenando pela dificuldade, retorna a mais difícil
@@ -128,10 +129,29 @@ router.post('/starttest', function(req, res, next) {
 				var question;				
 				if (result.type == CONSTS.EVAL_BY_CATEGORIES){
 					if(result.categories.length > 0){						
-						var q = categoryModel.findById(result.categories[0]).populate('questions');
+						//Popular três niveis de subCategorias e suas questões
+						var q = categoryModel.findById(result.categories[0])
+						.populate(
+							{path:'subCategories._id', model:'Category',
+							populate: {path:'subCategories._id', model:'Category'}
+						})
+						.lean();
 						q.exec(function(err, category){
-							// console.log(err);
-							// console.log(util.inspect(category, false, null));
+							categoryModel.populate(category,
+								{ path:'questions._id subCategories._id.questions._id subCategories._id.subCategories._id.questions._id',
+								  model:'Question', options: { lean: true }},								
+								function(err, category){									
+									//Juntando as questões em um único array (category.questions)									
+									for (var i = 0; i < category.subCategories.length; i++) {
+										var subs = category.subCategories[i]._id.subCategories;										
+										for (var j = 0; j < subs.length; j++) {											
+											category.questions = category.questions.concat(subs[j]._id.questions);
+										};
+										category.questions = category.questions.concat(category.subCategories[i]._id.questions);
+									};									
+									console.log(util.inspect(category.questions, false, null));
+								}
+							);
 							if(category.questions.length > 0){
 								question = testStrat.nextQuestion('', category.questions);								
 								var studTest = new studentTestModel();
@@ -142,8 +162,7 @@ router.post('/starttest', function(req, res, next) {
 								studTest.save();
 
 								req.session.passport.user.test = studTest._id;
-								//Envia a questão
-								console.log(question);
+								//Envia a questão								
 								res.send(question);
 							}
 							else{
@@ -224,6 +243,7 @@ router.post('/checkquestion', function(req, res, next){
  * Rota que encaminha as questões
  * TODO Avaliar a modularização...
  */
+
 router.post('/nextquestion', function(req, res, next) {
 	if (req.body.answer_id){
 		//Busca registro mais atual do estado de execução da avaliação

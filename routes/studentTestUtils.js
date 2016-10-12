@@ -13,6 +13,8 @@ StudentTestUtil.prototype = {
 			}
 			questions = questions.concat(category.subCategories[i].questions);
 		}
+		questions = questions.concat(category.questions);
+		questions.reverse();
 		return questions;
 	}
 };

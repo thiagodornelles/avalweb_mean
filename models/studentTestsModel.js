@@ -5,8 +5,10 @@ var studentTestSchema = new mongoose.Schema({
 	test: { type: mongoose.Schema.Types.ObjectId, ref: 'Test' },
 	date: Date,
 	active: Boolean,	
-	questionsAnswered: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
-	answers: [mongoose.Schema.Types.ObjectId]
+	answeredQuestions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
+	answeredCategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
+	answers: [mongoose.Schema.Types.ObjectId],
+	actualCategory: Number
 });
 
 module.exports = mongoose.model('StudentTest', studentTestSchema);

@@ -26,10 +26,6 @@ var testStrat = new TestStrategy();
 // e a questões do banco
 var DefaultStrategy = function () {
 	this.nextQuestion = function (answer, questions) {
-		if (questions.length == 0) {
-			return "end of test";
-		}
-		// console.log(questions);
 		return questions[0];
 	}
 };
@@ -120,8 +116,7 @@ router.post('/starttest', function (req, res, next) {
 										studTest.user = req.session.passport.user.username;
 										studTest.test = req.body._id;
 										studTest.date = new Date();
-										studTest.actualCategory = 0;
-										studTest.answeredQuestions.push(question);
+										studTest.actualCategory = 1;									
 										studTest.save();
 
 										req.session.passport.user.test = studTest._id;
@@ -145,7 +140,7 @@ router.post('/starttest', function (req, res, next) {
 					studTest.user = req.session.passport.user.username;
 					studTest.test = req.body._id;
 					studTest.date = new Date();
-					studTest.answeredQuestions.push(question._id);
+					// studTest.answeredQuestions.push(question._id);
 					studTest.save();
 
 					req.session.passport.user.test = studTest._id;
@@ -269,14 +264,14 @@ router.post('/nextquestion', function (req, res, next) {
 										}
 									}
 								}
-								//**** Buscando nova questão *****
-								var question = testStrat.nextQuestion(rightAnswer, qtemp);
 
-								//String que termina o teste
-								if (question == 'end of test') {
-									res.send(question);
+								if(qtemp.length <= 0){									
+									res.send('end of test');									
 								}
-								else {
+								else{
+									//**** Buscando nova questão *****
+									var question = testStrat.nextQuestion(rightAnswer, qtemp);
+															
 									//Grava nova questão a responder
 									studTest[0].answeredQuestions.push(question._id);
 									studTest[0].save();
@@ -287,15 +282,7 @@ router.post('/nextquestion', function (req, res, next) {
 							// PROVA POR CATEGORIAS
 							//----------------------
 							else if (test.type == CONSTS.EVAL_BY_CATEGORIES) {
-								//-------------------------------------------------------
-								// Se acertar devemos pegar a proxima categoria da prova
-								//-------------------------------------------------------
-								if (rightAnswer) {
-									studTest[0].actualCategory = studTest[0].actualCategory + 1;
-								}
-								studTest[0].answeredQuestions.push(question._id);									
-								studTest[0].save();
-
+								
 								//Buscar questões da próxima categoria
 								var actualCategory = studTest[0].actualCategory;
 								if (actualCategory >= test.categories.length){
@@ -323,12 +310,10 @@ router.post('/nextquestion', function (req, res, next) {
 											var questionsAns = studTest[0].answeredQuestions;
 											for (var i = category.questions.length - 1; i > -1; i--) {
 												for (var j = 0; j < questionsAns.length; j++) {
-													if (questionsAns[j].toString() == category.questions[i]._id.toString()) {
-														console.log('removed');
-														console.log(category.questions[i]);
+													if (questionsAns[j].toString() == category.questions[i]._id.toString()) {														
 														category.questions.splice(i, 1);
 														break;
-													}
+													}													
 												}
 											}
 											if (category.questions.length > 0) {												
@@ -337,7 +322,9 @@ router.post('/nextquestion', function (req, res, next) {
 												studTest[0].test = req.body._id;
 												studTest[0].date = new Date();
 												studTest[0].actualCategory = actualCategory;
-												studTest[0].answeredQuestions.push(question);
+												// studTest[0].answeredQuestions.push(question);
+												studTest[0].answeredCategories.push(category._id);
+												studTest[0].actualCategory = studTest[0].actualCategory + 1;
 												studTest[0].save();
 
 												req.session.passport.user.test = studTest._id;

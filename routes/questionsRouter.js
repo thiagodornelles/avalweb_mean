@@ -9,8 +9,8 @@ var isLoggedIn = require('./baseMiddlewares');
 var indexOf_Id = function(array, id){
 	var index = -1;
 	for (var i = 0; i < array.length; i++) {
-		console.log(array[i]._id.toString() + ':' + id.toString());
-	    if (array[i]._id.toString() == id.toString()) {
+		console.log(array[i].toString() + ':' + id.toString());
+	    if (array[i].toString() == id.toString()) {
 	        index = i;
 	        break;
 	    }
@@ -34,20 +34,19 @@ router.get('/id/:id', function(req, res, next){
 });
 
 router.get('/search', function(req, res, next) {		
-	var query = questionModel.find({$or:[
-										{wording: new RegExp(req.query.filter, 'i')},									
-										{subject: new RegExp(req.query.filter, 'i')}
-										]});	
-	query.exec(function (err, result){		
+	var query = questionModel.find({$or:
+										[{wording: new RegExp(req.query.filter, 'i')}]
+									})
+	.populate({path:'category',model:'Category'});
+	query.exec(function (err, result){				
 		res.json(result);		
 	});		
 });
 
 router.post('/', function(req, res, next) {	
-	if(req.body.wording && req.body.subject){		
+	if(req.body.wording){		
 		var question = new questionModel();
-		question.wording = req.body.wording;
-		question.subject = req.body.subject;
+		question.wording = req.body.wording;		
 		question.category = req.body.category;
 		question.difficulty = req.body.difficulty;
 		question.answers.push(req.body.answers[0]);
@@ -79,9 +78,8 @@ router.post('/', function(req, res, next) {
 
 router.put('/id/:id', function(req, res, next) {	
 	questionModel.findById(req.params.id, function(err, result){
-		if(req.body.wording && req.body.subject){			
-			result.wording = req.body.wording;
-			result.subject = req.body.subject;
+		if(req.body.wording){			
+			result.wording = req.body.wording;			
 			var previousCategory = result.category;
 			result.category = req.body.category;
 			result.difficulty = req.body.difficulty;		
@@ -92,11 +90,11 @@ router.put('/id/:id', function(req, res, next) {
 			result.answers[4] = req.body.answers[4];
 			result.media = new Buffer(0);
 			result.save(function(err, result) {
-				if (err)
+				if (err)				
 					res.send(err);
 				else{					
 					//Mudou categoria
-					if (req.body.category != previousCategory){
+					if (req.body.category._id != previousCategory){
 						//Se anteriormente não tinha categoria específica, não remove
 						if (previousCategory != ''){
 							var q = categoryModel.findById(previousCategory);

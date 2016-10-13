@@ -291,60 +291,65 @@ router.post('/nextquestion', function (req, res, next) {
 								// Se acertar devemos pegar a proxima categoria da prova
 								//-------------------------------------------------------
 								if (rightAnswer) {
-									studTest[0].answeredQuestions.push(question._id);
 									studTest[0].actualCategory = studTest[0].actualCategory + 1;
-									studTest[0].save();
+								}
+								studTest[0].answeredQuestions.push(question._id);									
+								studTest[0].save();
 
-									//Buscar questões da próxima categoria
-									var actualCategory = studTest[0].actualCategory;
-									if (actualCategory >= test.categories.length){
-										res.send("end of test");
-										return;
-									}												
-									//Popular três niveis de subCategorias e suas questões
-									var q = categoryModel.findById(test.categories[actualCategory])
-										.populate(
+								//Buscar questões da próxima categoria
+								var actualCategory = studTest[0].actualCategory;
+								if (actualCategory >= test.categories.length){
+									res.send("end of test");
+									return;
+								}												
+								//Popular três niveis de subCategorias e suas questões
+								var q = categoryModel.findById(test.categories[actualCategory])
+									.populate(
+									{
+										path: 'subCategories', model: 'Category',
+										populate: { path: 'subCategories', model: 'Category' }
+									});													
+								q.exec(function (err, category) {
+									categoryModel.populate(
+										category,
 										{
-											path: 'subCategories', model: 'Category',
-											populate: { path: 'subCategories', model: 'Category' }
-										});													
-									q.exec(function (err, category) {
-										categoryModel.populate(
-											category,
-											{
-												path: 'questions subCategories.questions subCategories.subCategories.questions',
-												model: 'Question'															
-											},
-											function (err, category) {
-												//Pega as questões na hierarquia
-												category.questions = stUtil.getQuestionsFromCategory(category);
-												console.log(category.questions);
-												if (category.questions.length > 0) {
-													question = testStrat.nextQuestion('', category.questions);
-													var studTest = new studentTestModel();
-													studTest.user = req.session.passport.user.username;
-													studTest.test = req.body._id;
-													studTest.date = new Date();
-													studTest.actualCategory = actualCategory;
-													studTest.answeredQuestions.push(question);
-													studTest.save();
+											path: 'questions subCategories.questions subCategories.subCategories.questions',
+											model: 'Question'															
+										},
+										function (err, category) {
+											//Pega as questões na hierarquia
+											category.questions = stUtil.getQuestionsFromCategory(category);											
+											//Remoção das questões já respondidas											
+											var questionsAns = studTest[0].answeredQuestions;
+											for (var i = category.questions.length - 1; i > -1; i--) {
+												for (var j = 0; j < questionsAns.length; j++) {
+													if (questionsAns[j].toString() == category.questions[i]._id.toString()) {
+														console.log('removed');
+														console.log(category.questions[i]);
+														category.questions.splice(i, 1);
+														break;
+													}
+												}
+											}
+											if (category.questions.length > 0) {												
+												question = testStrat.nextQuestion('', category.questions);												
+												studTest[0].user = req.session.passport.user.username;
+												studTest[0].test = req.body._id;
+												studTest[0].date = new Date();
+												studTest[0].actualCategory = actualCategory;
+												studTest[0].answeredQuestions.push(question);
+												studTest[0].save();
 
-													req.session.passport.user.test = studTest._id;
-													//Envia a questão
-													res.send(question);
-												}
-												else {
-													res.send("end of test");
-												}
-											})
-									});
-								}
-								//-------------------------------------------------------
-								// Se errar devemos pegar mais uma da mesma categoria
-								//-------------------------------------------------------
-								else {
-									
-								}
+												req.session.passport.user.test = studTest._id;
+												//Envia a questão
+												res.send(question);
+												return;
+											}
+											else {												
+												res.send("end of test");
+											}
+										})
+								});								
 							}
 						});
 					}

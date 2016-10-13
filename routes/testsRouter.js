@@ -37,7 +37,7 @@ router.post('/', function(req, res, next) {
 		test.type = req.body.type;
 		//Prova por Categorias
 		if(req.body.type == 1){			
-			for(var i = 0; i < req.body.selectedCategories.length; i++){
+			for(var i = 0; i < req.body.selectedCategories.length; i++){												
 				test.categories.push(req.body.selectedCategories[i]._id);
 			}
 			test.questions = [];

@@ -87,7 +87,7 @@ var testDialogController = function($scope, $mdDialog, $http, test) {
 			.success(function(response, status){
 				if(response == 'end of test'){
 					$scope.form = response;
-				}
+				}								
 				else if(response){
 					$scope.form = '5AnswerQuestion';
 					$scope.question = response;

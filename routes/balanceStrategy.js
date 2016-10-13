@@ -4,10 +4,7 @@ var questionModel = require('../models/questionsModel');
 var categoryModel = require('../models/categoriesModel');
 
 var BalanceStrategy = function(){	
-	this.nextQuestion = function(answer, questions){		
-		if(questions.length == 0){
-			return "end of test";
-		}
+	this.nextQuestion = function(answer, questions){
 		// console.log(answer);
 		//Teste iniciando... Seleciona uma questão difícil
 		if(answer === ''){

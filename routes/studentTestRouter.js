@@ -13,6 +13,7 @@ var BalanceStrategy = require('./balanceStrategy');
 var StudentTestUtils = require('./studentTestUtils');
 const util = require('util');
 
+
 /*
 * -----------------------------------------------------------------------------------
 * INÍCIO -- Código referente a geração de uma estrategia de aplicação de avaliação
@@ -25,7 +26,7 @@ var testStrat = new TestStrategy();
 // Implementamos uma estrategia conforme a resposta da última questão
 // e a questões do banco
 var DefaultStrategy = function () {
-	this.nextQuestion = function (answer, questions) {
+	this.nextQuestion = function (answer, questions, anyData) {
 		return questions[0];
 	}
 };
@@ -111,12 +112,13 @@ router.post('/starttest', function (req, res, next) {
 									category.questions = stUtil.getQuestionsFromCategory(category);
 
 									if (category.questions.length > 0) {
-										question = testStrat.nextQuestion('', category.questions);
+										question = testStrat.nextQuestion('', category.questions, req);
 										var studTest = new studentTestModel();
 										studTest.user = req.session.passport.user.username;
 										studTest.test = req.body._id;
 										studTest.date = new Date();
-										studTest.actualCategory = 1;									
+										studTest.actualCategory = 1;
+										studTest.numberRetries = 0;									
 										studTest.save();
 
 										req.session.passport.user.test = studTest._id;
@@ -135,7 +137,7 @@ router.post('/starttest', function (req, res, next) {
 					}
 				}
 				else if (result.type == CONSTS.EVAL_BY_QUESTIONS) {
-					question = testStrat.nextQuestion('', result.questions);
+					question = testStrat.nextQuestion('', result.questions, req);
 					var studTest = new studentTestModel();
 					studTest.user = req.session.passport.user.username;
 					studTest.test = req.body._id;
@@ -144,8 +146,7 @@ router.post('/starttest', function (req, res, next) {
 					studTest.save();
 
 					req.session.passport.user.test = studTest._id;
-					//Envia a questão
-					// console.log(question);
+					//Envia a questão					
 					res.send(question);
 				}
 			}
@@ -270,7 +271,7 @@ router.post('/nextquestion', function (req, res, next) {
 								}
 								else{
 									//**** Buscando nova questão *****
-									var question = testStrat.nextQuestion(rightAnswer, qtemp);
+									var question = testStrat.nextQuestion(rightAnswer, qtemp, req);
 															
 									//Grava nova questão a responder
 									studTest[0].answeredQuestions.push(question._id);
@@ -282,7 +283,7 @@ router.post('/nextquestion', function (req, res, next) {
 							// PROVA POR CATEGORIAS
 							//----------------------
 							else if (test.type == CONSTS.EVAL_BY_CATEGORIES) {
-								
+
 								//Buscar questões da próxima categoria
 								var actualCategory = studTest[0].actualCategory;
 								if (actualCategory >= test.categories.length){
@@ -316,21 +317,23 @@ router.post('/nextquestion', function (req, res, next) {
 													}													
 												}
 											}
-											if (category.questions.length > 0) {												
-												question = testStrat.nextQuestion('', category.questions);												
+											if (category.questions.length > 0) {
+												//Objeto necessário para esta estrategia 
+												var userData = new Object();
+												userData.user = req.session.passport.user.username;
+												userData.test = req.body._id
+														
+												question = testStrat.nextQuestion(rightAnswer, category.questions, userData);												
 												studTest[0].user = req.session.passport.user.username;
 												studTest[0].test = req.body._id;
 												studTest[0].date = new Date();
-												studTest[0].actualCategory = actualCategory;
-												// studTest[0].answeredQuestions.push(question);
 												studTest[0].answeredCategories.push(category._id);
-												studTest[0].actualCategory = studTest[0].actualCategory + 1;
+												studTest[0].actualCategory++;
 												studTest[0].save();
 
 												req.session.passport.user.test = studTest._id;
 												//Envia a questão
-												res.send(question);
-												return;
+												res.send(question);												
 											}
 											else {												
 												res.send("end of test");

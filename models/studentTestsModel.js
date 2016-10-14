@@ -8,7 +8,8 @@ var studentTestSchema = new mongoose.Schema({
 	answeredQuestions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
 	answeredCategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
 	answers: [mongoose.Schema.Types.ObjectId],
-	actualCategory: Number
+	actualCategory: Number,
+	numberRetries: Number
 });
 
 module.exports = mongoose.model('StudentTest', studentTestSchema);

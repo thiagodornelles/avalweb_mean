@@ -11,8 +11,8 @@ TestStrategy.prototype = {
         this.questions = questions;
     },
  
-    nextQuestion: function(answer, questions){
-        return this.strategy.nextQuestion(answer, questions);
+    nextQuestion: function(answer, questions, anyData){
+        return this.strategy.nextQuestion(answer, questions, anyData);
     }
 };
 

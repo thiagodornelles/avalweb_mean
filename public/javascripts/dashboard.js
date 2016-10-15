@@ -86,7 +86,7 @@ app.config(['$routeProvider', '$locationProvider',
 			templateUrl: './studentTestList.html',
 			controller: 'studentTestController'		
 		})
-		.when('/invite', {
+		.when('/invites', {
 			templateUrl: './invite.html',
 			controller: 'invitesController'	
 		});

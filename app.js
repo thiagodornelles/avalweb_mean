@@ -20,6 +20,7 @@ var classesRouter       = require('./routes/classesRouter');
 var studentTestRouter   = require('./routes/studentTestRouter');
 var categoriesRouter    = require('./routes/categoriesRouter');
 var invitesRouter       = require('./routes/invitesRouter');
+
 //Main Router
 var mainRouter = express.Router();
 
@@ -97,7 +98,7 @@ app.use('/tests', testsRouter);
 app.use('/classes', classesRouter);
 app.use('/studenttests', studentTestRouter);
 app.use('/categories', categoriesRouter);
-app.use('/invite', invitesRouter);
+app.use('/invites', invitesRouter);
 
 app.post('/login',
 	passport.authenticate('local',

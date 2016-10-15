@@ -7,15 +7,21 @@
 					<textarea ng-model="invites" length="30" rows="10" md-select-on-focus
 						ng-required="true">
 					</textarea>
+				</md-input-container>				
+			</div>
+			<div layout-gt-sm="row" flex>
+				<md-input-container flex>
+					<label>Senha para envio de emails</label>
+					<input type="password" ng-model="password">
 				</md-input-container>
 			</div>
 			<p>Exemplo:</p>
-			<p>João da Silva, joaodasilva@email.com</p>
-			<p>José de Souza, josedesouza@email.com</p>
+			<p>João da Silva,joaodasilva@email.com</p>
+			<p>José de Souza,josedesouza@email.com</p>
 		</form>
-	</md-content>
+	</md-content>	
 	<md-button id="fab_send_invite" class="md-fab md-fab-bottom-right"
-	ng-click="openDialogQuestion()">
+	ng-click="sendInvites()">
 		<i class="material-icons">send</i>
 	</md-button>		
 </div>

@@ -4,18 +4,9 @@ var path = require('path');
 var mongoose = require('mongoose');
 var categoryModel = require('../models/categoriesModel');
 var isLoggedIn = require('./baseMiddlewares');
+var routerUtils = require('./routerUtils.js');
 const util = require('util');
-
-var indexOf_Id = function(array, id) {
-	var index = -1;
-	for (var i = 0; i < array.length; i++) {
-		if (array[i].toString() == id.toString()) {
-			index = i;
-			break;
-		}
-	}
-	return index;
-};
+var rUtils = new routerUtils();
 
 router.get('/', isLoggedIn, function(req, res, next) {
 	return next();
@@ -95,7 +86,7 @@ router.put('/id/:id', function(req, res, next) {
 						//Remover a categoria pai antiga
 						categoryModel.findById(prevSuperCategory, function(err, result2) {
 							if (result2) {
-								var index = indexOf_Id(result2.subCategories, req.params.id);
+								var index = rUtils.indexOf_Id(result2.subCategories, req.params.id);
 								if (index > -1) {
 									result2.subCategories.splice(index, 1);
 								}
@@ -152,7 +143,7 @@ router.delete('/id/:id', function(req, res, next) {
 				categoryModel.findById(result.superCategory,
 					function(err, result) {
 						if (result) {
-							var index = indexOf_Id(result.subCategories, req.params.id);
+							var index = rUtils.indexOf_Id(result.subCategories, req.params.id);
 							if (index > -1) {
 								result.subCategories.splice(index, 1);
 							}

@@ -5,18 +5,9 @@ var mongoose = require('mongoose');
 var questionModel = require('../models/questionsModel');
 var categoryModel = require('../models/categoriesModel');
 var isLoggedIn = require('./baseMiddlewares');
+var RouterUtils = require('./routerUtils');
+var rUtils = new RouterUtils();
 
-var indexOf_Id = function(array, id){
-	var index = -1;
-	for (var i = 0; i < array.length; i++) {
-		console.log(array[i].toString() + ':' + id.toString());
-	    if (array[i].toString() == id.toString()) {
-	        index = i;
-	        break;
-	    }
-	}
-	return index;
-};
 
 router.get('/', isLoggedIn, function(req, res, next){
 	return next();
@@ -100,7 +91,7 @@ router.put('/id/:id', function(req, res, next) {
 							var q = categoryModel.findById(previousCategory);
 							q.exec(function(err, category){
 								if(category){
-									var i = indexOf_Id(category.questions, req.params.id);
+									var i = rUtils.indexOf_Id(category.questions, req.params.id);
 									if(i > -1)
 									category.questions.splice(i, 1);
 									category.save();
@@ -138,7 +129,7 @@ router.delete('/id/:id', function(req, res, next) {
 			var q = categoryModel.findById(question.category);
 			q.exec(function(err, category){
 				if(category){					
-					var i = indexOf_Id(category.questions, req.params.id);
+					var i = rUtils.indexOf_Id(category.questions, req.params.id);
 					if(i > -1)
 						category.questions.splice(i, 1);
 					category.save();

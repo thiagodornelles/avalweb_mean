@@ -1,30 +1,30 @@
-<md-dialog aria-label="Editar avaliação" flex>	
+<md-dialog aria-label="Editar avaliação" flex>
 	<md-toolbar class="md-hue-2">
 		<div class="md-toolbar-tools">
 			<h2 ng-if="!useFullScreen">Editar avaliação</h2>
-			<span ng-if="!useFullScreen"flex></span>
+			<span ng-if="!useFullScreen" flex></span>
 			<input placeholder=" Pesquisar" ng-model="search" flex="70" class="search-dialog">
 			<md-button class="md-icon-button" ng-click="refreshList('')">
 				<i class="material-icons">refresh</i>
 			</md-button>
 			<span flex></span>
-			<md-button class="md-icon-button" ng-click="cancel();">			
+			<md-button class="md-icon-button" ng-click="cancel();">
 				<i class="material-icons">clear</i>
 			</md-button>
 		</div>
-	</md-toolbar>		
+	</md-toolbar>
 	<form>
-		<md-dialog-content>				
+		<md-dialog-content>
 			<md-content layout-padding>
 				<div layout-gt-xs="row">
 					<md-input-container class="md-block" flex>
 						<label>Nome:</label>
-						<input ng-model="test.name">					
-					</md-input-container>					
+						<input ng-model="test.name">
+					</md-input-container>
 					<md-datepicker ng-model="test.date" md-placeholder="Aplicação">
-          			</md-datepicker>
-          		</div>
-          		<md-input-container class="md-block">	          		
+					</md-datepicker>
+				</div>				
+				<md-input-container class="md-block">
 					<label>Estratégia de aplicação:</label>
 					<md-select ng-model="test.strategy">
 						<md-option value="fixed_order">
@@ -35,9 +35,17 @@
 						</md-option>
 					</md-select>
 				</md-input-container>
-				<div layout-gt-xs="row">					
+				<md-input-container class="md-block">
+					<label>Turma para aplicação</label>
+					<md-select multiple="true" ng-model="test.classes">						
+						<md-option value="{{c._id}}" ng-repeat="c in classes">
+							{{c.name}}
+						</md-option>
+					</md-select>
+				</md-input-container>
+				<div layout-gt-xs="row">
 					<md-radio-group ng-model="test.type">
-					<p>Tipo de prova:</p>
+						<p>Tipo de prova:</p>
 						<md-radio-button value="1">
 							Por categorias
 						</md-radio-button>
@@ -49,121 +57,113 @@
 
 				<!-- Area de escolha das categorias ou questões -->
 				<div layout-gt-xs="row" flex>
-				<fieldset class="standard" flex ng-if="test.type == 1">
-          			<legend>Categorias</legend>  			
-					<md-content>
-						<md-list flex>
-							<md-list-item id="{{c._id}}"
-							ng-repeat="c in categories | filter:search | orderBy:['name']" flex>
-								<div class="md-list-item-text" layout="column"
-								style="min-width: 100px;">
-									<p>{{c.name | limitTo: 100}}</p>
-								</div>
-								<span flex></span>
-								<md-button ng-click="addCategoryToTest(c)">
-									<i class="material-icons">add</i>
-								</md-button>								
-								<md-divider></md-divider>
-							</md-list-item>
-						</md-list>						
-					</md-content>
-				</fieldset>				
-				<fieldset class="standard" flex ng-if="test.type == 1">
-          			<legend>Ordem das categorias</legend>  			
-					<md-content>
-						<md-list flex>
-							<md-list-item id="{{q._id}}"
-							ng-repeat="c in test.selectedCategories track by $index" flex>
-								<div class="md-list-item-text" layout="column"
-								style="min-width: 100px;">
-									<p>{{c.name | limitTo: 100}}</p>
-								</div>
-								<span flex></span>
-								<div layout="row">
-									<md-button ng-click="removeCategoryFromTest(c)" class="small-button">
-										<i class="material-icons">clear</i>
+					<fieldset class="standard" flex ng-if="test.type == 1">
+						<legend>Categorias</legend>
+						<md-content>
+							<md-list flex>
+								<md-list-item id="{{c._id}}" ng-repeat="c in categories | filter:search | orderBy:['name']" flex>
+									<div class="md-list-item-text" layout="column" style="min-width: 100px;">
+										<p>{{c.name | limitTo: 100}}</p>
+									</div>
+									<span flex></span>
+									<md-button ng-click="addCategoryToTest(c)">
+										<i class="material-icons">add</i>
 									</md-button>
-									<md-button ng-click="upCategory(c)" class="small-button">
-										<i class="material-icons">expand_less</i>
-									</md-button>
-									<md-button ng-click="downCategory(c)" class="small-button">
-										<i class="material-icons">expand_more</i>
-									<md-button>						
-								</div>								
-								<md-divider></md-divider>
-							</md-list-item>
-						</md-list>						
-					</md-content>
-				</fieldset>
-				<fieldset class="standard" flex ng-if="test.type == 2">
-          			<legend>Questões</legend>          			
-          			<md-input-container class="md-block">
-          				<label>Filtrar por categoria</label>
-	          			<md-select ng-model="filter_category">
-	          				<md-option value="">
-								Sem filtro
-							</md-option>
-							<md-option value="{{c.name}}" ng-repeat="c in categories">
-								{{c.name}}
-							</md-option>
-						</md-select>
-					</md-input-container>
-					<md-content>
-						<md-list flex>
-							<md-list-item id="{{q._id}}"
-							ng-repeat="q in questions | filter:search |
+									<md-divider></md-divider>
+								</md-list-item>
+							</md-list>
+						</md-content>
+					</fieldset>
+					<fieldset class="standard" flex ng-if="test.type == 1">
+						<legend>Ordem das categorias</legend>
+						<md-content>
+							<md-list flex>
+								<md-list-item id="{{q._id}}" ng-repeat="c in test.selectedCategories track by $index" flex>
+									<div class="md-list-item-text" layout="column" style="min-width: 100px;">
+										<p>{{c.name | limitTo: 100}}</p>
+									</div>
+									<span flex></span>
+									<div layout="row">
+										<md-button ng-click="removeCategoryFromTest(c)" class="small-button">
+											<i class="material-icons">clear</i>
+										</md-button>
+										<md-button ng-click="upCategory(c)" class="small-button">
+											<i class="material-icons">expand_less</i>
+										</md-button>
+										<md-button ng-click="downCategory(c)" class="small-button">
+											<i class="material-icons">expand_more</i>
+											<md-button>
+									</div>
+									<md-divider></md-divider>
+								</md-list-item>
+							</md-list>
+						</md-content>
+					</fieldset>
+					<fieldset class="standard" flex ng-if="test.type == 2">
+						<legend>Questões</legend>
+						<md-input-container class="md-block">
+							<label>Filtrar por categoria</label>
+							<md-select ng-model="filter_category">
+								<md-option value="">
+									Sem filtro
+								</md-option>
+								<md-option value="{{c.name}}" ng-repeat="c in categories">
+									{{c.name}}
+								</md-option>
+							</md-select>
+						</md-input-container>
+						<md-content>
+							<md-list flex>
+								<md-list-item id="{{q._id}}" ng-repeat="q in questions | filter:search |
 							           filter:filter_category | orderBy:['wording']" flex>
-								<div class="md-list-item-text" layout="column"
-								style="min-width: 100px;">
-									<p>{{q.wording | limitTo: 100}}</p>
-								</div>
-								<span flex></span>					
-								<md-button ng-click="addQuestionToTest(q)">
-									<i class="material-icons">add</i>
-								</md-button>								
-								<md-divider></md-divider>
-							</md-list-item>
-						</md-list>						
-					</md-content>
-				</fieldset>				
-				<fieldset class="standard" flex ng-if="test.type == 2">
-          			<legend>Ordem das questões</legend>  			
-					<md-content>
-						<md-list flex>
-							<md-list-item id="{{q._id}}"
-							ng-repeat="q in test.selectedQuestions track by $index" flex>
-								<div class="md-list-item-text" layout="column"
-								style="min-width: 100px;">
-									<p>{{q.wording | limitTo: 100}}</p>
-								</div>
-								<span flex></span>
-								<div layout="row">
-									<md-button ng-click="removeQuestionFromTest(q)" class="small-button">
-										<i class="material-icons">clear</i>
+									<div class="md-list-item-text" layout="column" style="min-width: 100px;">
+										<p>{{q.wording | limitTo: 100}}</p>
+									</div>
+									<span flex></span>
+									<md-button ng-click="addQuestionToTest(q)">
+										<i class="material-icons">add</i>
 									</md-button>
-									<md-button ng-click="upQuestion(q)" class="small-button">
-										<i class="material-icons">expand_less</i>
-									</md-button>
-									<md-button ng-click="downQuestion(q)" class="small-button">
-										<i class="material-icons">expand_more</i>
-									<md-button>						
-								</div>								
-								<md-divider></md-divider>
-							</md-list-item>
-						</md-list>						
-					</md-content>
-				</fieldset>				
+									<md-divider></md-divider>
+								</md-list-item>
+							</md-list>
+						</md-content>
+					</fieldset>
+					<fieldset class="standard" flex ng-if="test.type == 2">
+						<legend>Ordem das questões</legend>
+						<md-content>
+							<md-list flex>
+								<md-list-item id="{{q._id}}" ng-repeat="q in test.selectedQuestions track by $index" flex>
+									<div class="md-list-item-text" layout="column" style="min-width: 100px;">
+										<p>{{q.wording | limitTo: 100}}</p>
+									</div>
+									<span flex></span>
+									<div layout="row">
+										<md-button ng-click="removeQuestionFromTest(q)" class="small-button">
+											<i class="material-icons">clear</i>
+										</md-button>
+										<md-button ng-click="upQuestion(q)" class="small-button">
+											<i class="material-icons">expand_less</i>
+										</md-button>
+										<md-button ng-click="downQuestion(q)" class="small-button">
+											<i class="material-icons">expand_more</i>
+											<md-button>
+									</div>
+									<md-divider></md-divider>
+								</md-list-item>
+							</md-list>
+						</md-content>
+					</fieldset>
 				</div>
-			</md-content>	
+			</md-content>
 		</md-dialog-content>
-	</form>		
+	</form>
 	<md-dialog-actions layout="row">
 		<md-button ng-click="cancel()">
 			Cancelar
 		</md-button>
-		<span flex></span>		
+		<span flex></span>
 		<md-button ng-click="saveTest('ok', test._id)">
 			Gravar
 		</md-button>
-	</md-dialog-actions>  
+	</md-dialog-actions>
 </md-dialog>

@@ -68,11 +68,11 @@ app.controller("testController", function($scope, $http, $mdDialog, $mdMedia, $m
 	}
 });
 
-//Fim do controlador
 
 var testDialogController = function($scope, $mdDialog, $http, $mdToast, $mdMedia, test) {
 	$scope.useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));
 	$scope.test = angular.copy(test);
+	
 	if($scope.test == ''){
 		//Cria um objeto test caso venha um string
 		$scope.test = new Object();		
@@ -102,6 +102,13 @@ var testDialogController = function($scope, $mdDialog, $http, $mdToast, $mdMedia
 		},
 		function(res){
 			$scope.questions = [];
+		});
+		$http.get('/classes/search')
+		.then(function(res){
+			$scope.classes = res.data;			
+		},
+		function(res){
+			$scope.classes = [];
 		});
 	};
 

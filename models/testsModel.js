@@ -6,6 +6,7 @@ var testSchema = new mongoose.Schema({
 	date : Date,	
 	questions : [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
 	categories : [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
+	classes : [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }],
 	strategy : String,
 	type: Number
 });

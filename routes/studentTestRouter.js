@@ -76,6 +76,8 @@ router.get('/search', function (req, res, next) {
 					.exec(function (err, result) {
 						if(result)
 							res.json(result);
+						else
+							res.json([]);
 					});
 				}				
 			});			

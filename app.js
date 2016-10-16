@@ -8,6 +8,7 @@ var session      = require('express-session');
 var passport     = require('passport');
 var mongoose     = require('mongoose');
 var isLoggedIn   = require('./routes/baseMiddlewares');
+var userModel    = require('./models/usersModel');
 
 //Conectando na base
 mongoose.connect('mongodb://localhost/avalweb');
@@ -20,6 +21,7 @@ var classesRouter       = require('./routes/classesRouter');
 var studentTestRouter   = require('./routes/studentTestRouter');
 var categoriesRouter    = require('./routes/categoriesRouter');
 var invitesRouter       = require('./routes/invitesRouter');
+var usersRouter         = require('./routes/usersRouter');
 
 //Main Router
 var mainRouter = express.Router();
@@ -41,18 +43,22 @@ var LocalStrategy = require('passport-local').Strategy;
 passport.use(new LocalStrategy({usernameField: 'user',
     							passwordField: 'password'},
 	
-	function(username, password, done) {		
-		if (password == "p" && username == "p"){
-			var user = {username: username, type: 'professor'};
-			return done(null, user);
-		}
-		else if (password == "a" && username == "a"){
-			var user = {username: username, type: 'student'};
-			return done(null, user);	
-		}
-		else{
-			return done(null, false);
-		}
+	function(username, password, done) {
+		userModel.findOne({userName: username})
+		.exec(function(err, user){
+			if (err) { return done(err); }
+			if (!user) { return done(null, false); }
+			if(user){
+				if(user.type == 1){
+					var u = {username: username, type: 'professor'};
+					return done(null, u);
+				}
+				else{
+					var u = {username: username, type: 'aluno'};
+					return done(null, u);
+				}
+			}
+		});
 	}
 ));
 
@@ -99,6 +105,7 @@ app.use('/classes', classesRouter);
 app.use('/studenttests', studentTestRouter);
 app.use('/categories', categoriesRouter);
 app.use('/invites', invitesRouter);
+app.use('/users', usersRouter);
 
 app.post('/login',
 	passport.authenticate('local',

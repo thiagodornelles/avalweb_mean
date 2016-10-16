@@ -43,9 +43,24 @@ app.controller("studentTestController", function($scope, $http, $mdDialog, $mdMe
 
 var testDialogController = function($scope, $mdDialog, $http, test) {		
 	$scope.test = angular.copy(test);
-	$scope.form = 'startForm';
+	console.log(test);
 	$scope.question = {};	
 	$scope.questionChecked = false;
+	
+	//consulta se já fez a prova
+	$scope.finished = function(){
+		$http.get('/studenttests/finishedtest/' + test._id)
+		.success(function(response, status){
+			if(response == 'test finished'){
+				$scope.form = 'reportForm';	
+			}
+			else{
+				$scope.form = 'startForm';
+			}
+		});
+	};
+
+	$scope.finished();	
 
 	$scope.cancel = function() {
 		$mdDialog.cancel();		

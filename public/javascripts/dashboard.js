@@ -19,7 +19,7 @@ app.service('appData', function(){
 //Controller for data binding to main page
 app.controller("dashController", function($scope, $mdSidenav, $mdMedia, $http, $window, appData) {
 	$scope.isSidenavOpen = $mdMedia('gt-md');
-	$scope.activity = '';	
+	$scope.activity = '';
 	
 	//Refresh event for update $scope data
 	$scope.$on('refresh', function(event, data) {

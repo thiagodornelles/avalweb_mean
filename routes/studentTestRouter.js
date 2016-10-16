@@ -64,25 +64,42 @@ router.get('/id/:id', function (req, res, next) {
 	});
 });
 
+router.get('/finishedtest/:id', function (req, res, next) {
+	//Busca registro mais atual do estado de execução da avaliação
+	studentTestModel.find({
+		'user': req.session.passport.user.username,
+		'test': req.params.id //ID da avaliação
+	})
+	.limit(1).sort({ 'date': -1 })
+	.exec(function (err, studTest) {
+		if(studTest.length > 0){
+			res.send("test finished");
+		}
+		else{
+			res.send("test not finished");		
+		}
+	});
+});
+
 router.get('/search', function (req, res, next) {
-	var username = req.session.passport.user.username;		
-	studentModel.findOne({email: username})
-	.exec(function(err, student){
-		if (student){
-			classModel.findOne({students: student._id})
-			.exec(function(err, clas){
-				if (clas){
-					testModel.find({classes: clas._id}, '-questions')
-					.exec(function (err, result) {
-						if(result)
-							res.json(result);
-						else
-							res.json([]);
+	var username = req.session.passport.user.username;
+	studentModel.findOne({ email: username })
+		.exec(function (err, student) {
+			if (student) {
+				classModel.findOne({ students: student._id })
+					.exec(function (err, clas) {
+						if (clas) {
+							testModel.find({ classes: clas._id }, '-questions')
+								.exec(function (err, result) {
+									if (result)
+										res.json(result);
+									else
+										res.json([]);
+								});
+						}
 					});
-				}				
-			});			
-		}		
-	});	
+			}
+		});
 });
 
 /*
@@ -133,8 +150,9 @@ router.post('/starttest', function (req, res, next) {
 										studTest.user = req.session.passport.user.username;
 										studTest.test = req.body._id;
 										studTest.date = new Date();
+										studTest.finished = true;
 										studTest.actualCategory = 1;
-										studTest.numberRetries = 0;									
+										studTest.numberRetries = 0;
 										studTest.save();
 
 										req.session.passport.user.test = studTest._id;
@@ -158,7 +176,8 @@ router.post('/starttest', function (req, res, next) {
 					studTest.user = req.session.passport.user.username;
 					studTest.test = req.body._id;
 					studTest.date = new Date();
-					// studTest.answeredQuestions.push(question._id);
+					studTest.finished = false;					
+					studTest.numberRetries = 0;					
 					studTest.save();
 
 					req.session.passport.user.test = studTest._id;
@@ -229,142 +248,148 @@ router.post('/nextquestion', function (req, res, next) {
 			'user': req.session.passport.user.username,
 			'test': req.body._id //ID da avaliação
 		})
-		.limit(1).sort({ 'date': -1 })
-		.exec(function (err, studTest) {
-			//Validando se encontrou registro de avaliação para este usuário			
-			if (studTest.length > 0) {
-				//Busca os dados das questões da avaliação					
-				testModel.findById(req.body._id).populate(
-					{
-						path: 'questions categories'
-					}
-				)
-				.exec(function (err, test) {
-					//console.log(test);
-					if (test) {
-						//Selecionando a estratégia
-						if (test.strategy == CONSTS.FIXED_ORDER)
-							testStrat.setStrategy(def);
-						else if (test.strategy == CONSTS.DIF_BALANCE)
-							testStrat.setStrategy(difBalance);
+			.limit(1).sort({ 'date': -1 })
+			.exec(function (err, studTest) {
+				//Validando se encontrou registro de avaliação para este usuário			
+				if (studTest.length > 0) {
+					//Busca os dados das questões da avaliação					
+					testModel.findById(req.body._id).populate(
+						{
+							path: 'questions categories'
+						}
+					)
+						.exec(function (err, test) {
+							//console.log(test);
+							if (test) {
+								//Selecionando a estratégia
+								if (test.strategy == CONSTS.FIXED_ORDER)
+									testStrat.setStrategy(def);
+								else if (test.strategy == CONSTS.DIF_BALANCE)
+									testStrat.setStrategy(difBalance);
 
-						var qtemp = test.questions;
-						var ctemp = test.categories;
-						//Verificar se o aluno acertou a última questão respondida
-						answered = studTest[0].answeredQuestions;
-						var lastQuestion = answered[answered.length - 1];
+								var qtemp = test.questions;
+								var ctemp = test.categories;
+								//Verificar se o aluno acertou a última questão respondida
+								answered = studTest[0].answeredQuestions;
+								var lastQuestion = answered[answered.length - 1];
 
-						//Procurando a questão respondida
-						questionModel.findById(lastQuestion)
-						.exec(function (err, question) {
-							var rightAnswer = false;
-							var lastAnswer = studTest[0].answers[studTest[0].answers.length - 1];
-							for (var i = 0; i < question.answers.length; i++) {
-								if (question.answers[i]._id.toString() == lastAnswer.toString() &&
-									question.answers[i].rightAnswer) {
-									rightAnswer = true;
-									break;
-								}
-							}
-							//----------------------
-							//  PROVA POR QUESTOES
-							//----------------------
-							if (test.type == CONSTS.EVAL_BY_QUESTIONS) {
-								//Remoção das questões já respondidas
-								//As questões não respondidas serão avaliadas pelo seletor de questões
-								var questionsAns = studTest[0].answeredQuestions;
-								for (var i = qtemp.length - 1; i > -1; i--) {
-									for (var j = 0; j < questionsAns.length; j++) {
-										if (questionsAns[j].toString() == qtemp[i]._id.toString()) {
-											qtemp.splice(i, 1);
-											break;
+								//Procurando a questão respondida
+								questionModel.findById(lastQuestion)
+									.exec(function (err, question) {
+										var rightAnswer = false;
+										var lastAnswer = studTest[0].answers[studTest[0].answers.length - 1];
+										for (var i = 0; i < question.answers.length; i++) {
+											if (question.answers[i]._id.toString() == lastAnswer.toString() &&
+												question.answers[i].rightAnswer) {
+												rightAnswer = true;
+												break;
+											}
 										}
-									}
-								}
-
-								if(qtemp.length <= 0){									
-									res.send('end of test');									
-								}
-								else{
-									//**** Buscando nova questão *****
-									var question = testStrat.nextQuestion(rightAnswer, qtemp, req);
-															
-									//Grava nova questão a responder
-									studTest[0].answeredQuestions.push(question._id);
-									studTest[0].save();
-									res.send(question);
-								}
-							}
-							//----------------------
-							// PROVA POR CATEGORIAS
-							//----------------------
-							else if (test.type == CONSTS.EVAL_BY_CATEGORIES) {
-
-								//Buscar questões da próxima categoria
-								var actualCategory = studTest[0].actualCategory;
-								if (actualCategory >= test.categories.length){
-									res.send("end of test");
-									return;
-								}												
-								//Popular três niveis de subCategorias e suas questões
-								var q = categoryModel.findById(test.categories[actualCategory])
-									.populate(
-									{
-										path: 'subCategories', model: 'Category',
-										populate: { path: 'subCategories', model: 'Category' }
-									});													
-								q.exec(function (err, category) {
-									categoryModel.populate(
-										category,
-										{
-											path: 'questions subCategories.questions subCategories.subCategories.questions',
-											model: 'Question'															
-										},
-										function (err, category) {
-											//Pega as questões na hierarquia
-											category.questions = stUtil.getQuestionsFromCategory(category);											
-											//Remoção das questões já respondidas											
+										//----------------------
+										//  PROVA POR QUESTOES
+										//----------------------
+										if (test.type == CONSTS.EVAL_BY_QUESTIONS) {
+											//Remoção das questões já respondidas
+											//As questões não respondidas serão avaliadas pelo seletor de questões
 											var questionsAns = studTest[0].answeredQuestions;
-											for (var i = category.questions.length - 1; i > -1; i--) {
+											for (var i = qtemp.length - 1; i > -1; i--) {
 												for (var j = 0; j < questionsAns.length; j++) {
-													if (questionsAns[j].toString() == category.questions[i]._id.toString()) {														
-														category.questions.splice(i, 1);
+													if (questionsAns[j].toString() == qtemp[i]._id.toString()) {
+														qtemp.splice(i, 1);
 														break;
-													}													
+													}
 												}
 											}
-											if (category.questions.length > 0) {
-												//Objeto necessário para esta estrategia 
-												var userData = new Object();
-												userData.user = req.session.passport.user.username;
-												userData.test = req.body._id
-														
-												question = testStrat.nextQuestion(rightAnswer, category.questions, userData);												
-												studTest[0].user = req.session.passport.user.username;
-												studTest[0].test = req.body._id;
-												studTest[0].date = new Date();
-												studTest[0].answeredCategories.push(category._id);
-												studTest[0].actualCategory++;
-												studTest[0].save();
 
-												req.session.passport.user.test = studTest._id;
-												//Envia a questão
-												res.send(question);												
+											if (qtemp.length <= 0) {												
+												studTest[0].finished = true;
+												studTest[0].save();
+												res.send('end of test');
 											}
-											else {												
+											else {
+												//**** Buscando nova questão *****
+												var question = testStrat.nextQuestion(rightAnswer, qtemp, req);
+
+												//Grava nova questão a responder
+												studTest[0].answeredQuestions.push(question._id);
+												studTest[0].save();
+												res.send(question);
+											}
+										}
+										//----------------------
+										// PROVA POR CATEGORIAS
+										//----------------------
+										else if (test.type == CONSTS.EVAL_BY_CATEGORIES) {
+
+											//Buscar questões da próxima categoria
+											var actualCategory = studTest[0].actualCategory;
+											if (actualCategory >= test.categories.length) {
+												studTest[0].finished = true;
+												studTest[0].save();
 												res.send("end of test");
+												return;
 											}
-										})
-								});								
+											//Popular três niveis de subCategorias e suas questões
+											var q = categoryModel.findById(test.categories[actualCategory])
+												.populate(
+												{
+													path: 'subCategories', model: 'Category',
+													populate: { path: 'subCategories', model: 'Category' }
+												});
+											q.exec(function (err, category) {
+												categoryModel.populate(
+													category,
+													{
+														path: 'questions subCategories.questions subCategories.subCategories.questions',
+														model: 'Question'
+													},
+													function (err, category) {
+														//Pega as questões na hierarquia
+														category.questions = stUtil.getQuestionsFromCategory(category);
+														//Remoção das questões já respondidas											
+														var questionsAns = studTest[0].answeredQuestions;
+														for (var i = category.questions.length - 1; i > -1; i--) {
+															for (var j = 0; j < questionsAns.length; j++) {
+																if (questionsAns[j].toString() == category.questions[i]._id.toString()) {
+																	category.questions.splice(i, 1);
+																	break;
+																}
+															}
+														}
+														if (category.questions.length > 0) {
+															//Objeto necessário para esta estrategia 
+															var userData = new Object();
+															userData.user = req.session.passport.user.username;
+															userData.test = req.body._id
+
+															question = testStrat.nextQuestion(rightAnswer, category.questions, userData);
+															studTest[0].user = req.session.passport.user.username;
+															studTest[0].test = req.body._id;
+															studTest[0].date = new Date();
+															studTest[0].answeredCategories.push(category._id);
+															studTest[0].actualCategory++;
+															studTest[0].save();
+
+															req.session.passport.user.test = studTest._id;
+															//Envia a questão
+															res.send(question);
+														}
+														else {
+															studTest[0].finished = true;
+															studTest[0].save();
+															res.send("end of test");
+														}
+													})
+											});
+										}
+									});
 							}
 						});
-					}
-				});
-			}
-			else {
-				res.send(err);
-			}
-		});
+				}
+				else {
+					res.send(err);
+				}
+			});
 	}
 	else {
 		return next();

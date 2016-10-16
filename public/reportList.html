@@ -1,0 +1,34 @@
+<div id='reports_list' ng-controller="reportController" layout="column" layout-fill>	
+	<md-content>        
+		<md-list flex>
+			<md-subheader ng-if="tests.length == 0" class="md-no-sticky">
+				Nenhuma avaliação encontrada.
+			</md-subheader>
+			<md-subheader ng-if="tests.length == 1" class="md-no-sticky">
+				1 resultado
+			</md-subheader>
+			<md-subheader ng-if="tests.length > 1" class="md-no-sticky">
+				{{tests.length}} resultados
+			</md-subheader>			
+			<md-list-item id="{{s._id}}" flex class="list-item" ng-repeat="s in tests"
+				ng-click="openDialogReport($event, s)">
+				<div class="md-list-item-text" layout="column">					
+					<h3>{{s.name}}</h3>
+					<p>{{s.date | date:'dd/MM/yyyy'}}</p>									
+				</div>
+				<span flex></span>
+				<md-icon aria-label="remove test"
+				class="md-secondary md-hue-2" ng-click="removeTest($event, s._id)">	
+					<i class="material-icons">delete forever</i>
+				</md-icon>
+				<md-divider></md-divider>
+			</md-list-item>			
+			<md-list-item>
+				<div class="md-list-item-text" layout="column">
+					<h3>&nbsp</h3>
+					<p>&nbsp</p>
+				</div>
+			</md-list-item>			
+		</md-list>
+	</md-content>
+</div>

@@ -1,0 +1,85 @@
+<md-dialog aria-label="Relatório de provas" flex>
+	<md-toolbar class="md-hue-2">
+		<div class="md-toolbar-tools">
+			<h2 ng-if="!useFullScreen">Relatório de provas</h2>
+			<span ng-if="!useFullScreen" flex></span>			
+			<span flex></span>
+			<md-button class="md-icon-button" ng-click="cancel();">
+				<i class="material-icons">clear</i>
+			</md-button>
+		</div>
+	</md-toolbar>
+	<form>
+		<md-dialog-content>
+			<md-content layout-padding>
+				<div layout-gt-xs="row">
+					<md-input-container class="md-block" flex>
+						<label>Nome:</label>
+						<input ng-model="test.name" disabled>
+					</md-input-container>
+					<md-datepicker ng-model="test.date" md-placeholder="Aplicação" ng-disabled="true">
+					</md-datepicker>
+				</div>
+				<div layout-gt-xs="row">
+					<md-input-container flex>
+						<label>Estratégia de aplicação:</label>
+						<md-select ng-model="test.strategy" ng-disabled="true">
+							<md-option value="fixed_order">
+								Por ordem fixa
+							</md-option>
+							<md-option value="dif_balance">
+								Balanço de dificuldade
+							</md-option>
+						</md-select>
+					</md-input-container>
+					<md-input-container flex>
+						<label>Turma para aplicação</label>
+						<md-select multiple="true" ng-model="test.classes" ng-disabled="true">						
+							<md-option value="{{c._id}}" ng-repeat="c in classes">
+								{{c.name}}
+							</md-option>
+						</md-select>
+					</md-input-container flex>				
+					<md-radio-group ng-model="test.type" ng-disabled="true">
+						<p>Tipo de prova:</p>
+						<md-radio-button value="1">
+							Por categorias
+						</md-radio-button>
+						<md-radio-button value="2">
+							Por questões
+						</md-radio-button>
+					</md-radio-group>
+				</div>
+				<!-- Area de exibição das questões e respostas' -->
+				<div layout-gt-xs="row" flex>
+					<fieldset class="standard" flex>
+						<legend>Questões e respostas</legend>
+						<md-content>
+							<md-list flex>
+								<md-list-item id="{{c._id}}" ng-repeat="c in categories | filter:search | orderBy:['name']" flex>
+									<div class="md-list-item-text" layout="column" style="min-width: 100px;">
+										<p>{{c.name | limitTo: 100}}</p>
+									</div>
+									<span flex></span>
+									<md-button ng-click="addCategoryToTest(c)">
+										<i class="material-icons">add</i>
+									</md-button>
+									<md-divider></md-divider>
+								</md-list-item>
+							</md-list>
+						</md-content>
+					</fieldset>
+				</div>
+			</md-content>
+		</md-dialog-content>
+	</form>
+	<md-dialog-actions layout="row">
+		<md-button ng-click="cancel()">
+			Cancelar
+		</md-button>
+		<span flex></span>
+		<md-button ng-click="saveTest('ok', test._id)">
+			Gravar
+		</md-button>
+	</md-dialog-actions>
+</md-dialog>

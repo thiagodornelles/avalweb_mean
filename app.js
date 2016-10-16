@@ -22,6 +22,7 @@ var studentTestRouter   = require('./routes/studentTestRouter');
 var categoriesRouter    = require('./routes/categoriesRouter');
 var invitesRouter       = require('./routes/invitesRouter');
 var usersRouter         = require('./routes/usersRouter');
+var reportsRouter       = require('./routes/reportsRouter');
 
 //Main Router
 var mainRouter = express.Router();
@@ -75,8 +76,7 @@ app.use(session({secret: 'avalwebsecret', resave: false, saveUninitialized: fals
 app.use(passport.initialize());
 app.use(passport.session());
 
-mainRouter.get('/start', isLoggedIn, function(req, res, next){
-	console.log(req.session.passport);
+mainRouter.get('/start', isLoggedIn, function(req, res, next){	
 	if(req.session.passport.user.type == 'professor'){
 		res.sendFile(path.resolve('public/dashboard.html'));
 	}
@@ -106,6 +106,7 @@ app.use('/studenttests', studentTestRouter);
 app.use('/categories', categoriesRouter);
 app.use('/invites', invitesRouter);
 app.use('/users', usersRouter);
+app.use('/reports', reportsRouter);
 
 app.post('/login',
 	passport.authenticate('local',

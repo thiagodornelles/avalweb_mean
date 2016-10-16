@@ -3,6 +3,8 @@ var router = express.Router();
 var path = require('path');
 var mongoose = require('mongoose');
 var testModel = require('../models/testsModel');
+var classModel = require('../models/classesModel');
+var studentModel = require('../models/studentsModel');
 var studentTestModel = require('../models/studentTestsModel');
 var questionModel = require('../models/questionsModel');
 var categoryModel = require('../models/categoriesModel');
@@ -62,11 +64,23 @@ router.get('/id/:id', function (req, res, next) {
 	});
 });
 
-router.get('/search', function (req, res, next) {	
-	var query = testModel.find({ name: new RegExp(req.query.name, 'i') }, '-questions');
-	query.exec(function (err, result) {
-		res.json(result);
-	});
+router.get('/search', function (req, res, next) {
+	var username = req.session.passport.user.username;		
+	studentModel.findOne({email: username})
+	.exec(function(err, student){
+		if (student){
+			classModel.findOne({students: student._id})
+			.exec(function(err, clas){
+				if (clas){
+					testModel.find({classes: clas._id}, '-questions')
+					.exec(function (err, result) {
+						if(result)
+							res.json(result);
+					});
+				}				
+			});			
+		}		
+	});	
 });
 
 /*

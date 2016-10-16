@@ -22,7 +22,8 @@ router.get('/id/:id', function (req, res, next) {
 });
 
 router.get('/search', function (req, res, next) {
-	var query = testModel.find({ name: new RegExp(req.query.name, 'i') }).populate('categories').populate('questions');
+	var query = testModel.find({ name: new RegExp(req.query.name, 'i') });
+	//.populate('categories').populate('questions');
 	query.exec(function (err, result) {
 		res.json(result);
 	});

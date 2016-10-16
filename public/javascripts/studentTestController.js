@@ -70,8 +70,8 @@ var testDialogController = function ($scope, $mdDialog, $http, test) {
 			.title('Desistir da avaliação?')
 			.textContent('Se você fechar a avaliação não poderá fazê-la novamente, ficando sem nota')
 			.ariaLabel('Desistir da avaliação')						
-			.cancel('Desistir')
-			.ok('Continuar avaliação');
+			.cancel('Sair')
+			.ok('Ficar');
 		confirm._options.skipHide = true;
 		$mdDialog.show(confirm)
 		.then(function () {

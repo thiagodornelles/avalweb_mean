@@ -150,7 +150,7 @@ router.post('/starttest', function (req, res, next) {
 										studTest.user = req.session.passport.user.username;
 										studTest.test = req.body._id;
 										studTest.date = new Date();
-										studTest.finished = true;
+										studTest.finished = false;
 										studTest.actualCategory = 1;
 										studTest.numberRetries = 0;
 										studTest.save();

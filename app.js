@@ -45,7 +45,7 @@ passport.use(new LocalStrategy({usernameField: 'user',
     							passwordField: 'password'},
 	
 	function(username, password, done) {
-		userModel.findOne({userName: username})
+		userModel.findOne({userName: username, password: password})
 		.exec(function(err, user){
 			if (err) { return done(err); }
 			if (!user) { return done(null, false); }

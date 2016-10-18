@@ -15,8 +15,13 @@
 					<label>Enunciado:</label>
 					<textarea ng-model="question.wording" md-maxlength="500" length="50" rows="4" md-select-on-focus ng-required="true">
 					</textarea>
-				</md-input-container>
-				<lf-ng-md-file-input lf-files="files01" lf-api="api01" ng-disabled="disabled01"></lf-ng-md-file-input>											
+				</md-input-container>				
+				<label ng-if="question.imagePath">{{question.imagePath}}</label>
+				<!--<label ng-if="uploadOK == 2">Erro ao enviar arquivo</label>-->
+				<lf-ng-md-file-input lf-files='files' progress> </lf-ng-md-file-input>
+				<!--<md-button ng-click="upload()">
+					Enviar imagem
+				</md-button>									-->
 				<md-input-container class="md-block">
 					<label>Dificuldade:</label>
 					<md-select ng-model="question.difficulty">
@@ -33,10 +38,7 @@
 				</md-input-container>
 				<md-input-container class="md-block">
 					<label>Categoria:</label>
-					<md-select ng-model="question.category._id">
-						<md-option value="">
-							Categoria raiz
-						</md-option>
+					<md-select ng-model="question.category._id">						
 						<md-option value="{{c._id}}" ng-repeat="c in categories">
 							{{c.name}}
 						</md-option>

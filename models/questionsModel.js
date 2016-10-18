@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 
 var questionSchema = new mongoose.Schema({
 	wording : String,
-	media : Buffer,	
+	imagePath : String,
 	answers : [{
 		answer : String,
 		feedback: String,

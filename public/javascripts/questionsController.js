@@ -3,6 +3,7 @@ app.controller("questionController", function ($scope, $http, $mdDialog, $mdMedi
 
 	appData.activity = "Questões";
 	$scope.$emit('refresh', appData);
+	$scope.uploadOK = 0;
 
 	$scope.refreshList = function () {
 		$http.get('/questions/search')
@@ -87,49 +88,79 @@ var questionDialogController = function ($scope, $mdDialog, $http, $mdToast, que
 		$mdDialog.cancel();
 	};
 	$scope.saveQuestion = function (answer, id) {
-		if (!id) {
-			$http({
-				method: 'POST',
-				url: './questions',
-				data: $scope.question
-			})
-				.success(function (data, status, headers, config) {
-					$mdDialog.hide(answer);
-					if (data == 'question saved') {
-						$mdToast.show($mdToast.simple()
-							.textContent('Dados salvos com sucesso')
-							.position('bottom left')
-							.hideDelay(3000));
-					}
-					else {
-						$mdToast.show($mdToast.simple()
-							.textContent('Dados não foram salvos')
-							.position('bottom left')
-							.hideDelay(3000));
-					}
-				});
-		}
-		else {
-			$http({
-				method: 'PUT',
-				url: './questions/id/' + $scope.question._id,
-				data: $scope.question
-			})
-				.success(function (data, status, headers, config) {
-					$mdDialog.hide(answer);
-					if (data == 'question saved') {
-						$mdToast.show($mdToast.simple()
-							.textContent('Dados salvos com sucesso')
-							.position('bottom left')
-							.hideDelay(3000));
-					}
-					else {
-						$mdToast.show($mdToast.simple()
-							.textContent('Dados não foram salvos')
-							.position('bottom left')
-							.hideDelay(3000));
-					}
-				});
-		}
+		//Enviando imagem
+		var formData = new FormData();
+		angular.forEach($scope.files, function (obj) {
+			formData.append('files[]', obj.lfFile);
+		});
+		$http.post('./questions/upload', formData, {
+			transformRequest: angular.identity,
+			headers: { 'Content-Type': undefined }
+		})
+			.then(function (result) {
+				$scope.uploadOK = 1;				
+				$scope.question.imagePath = result;
+				if (!id) {
+					$http({
+						method: 'POST',
+						url: './questions',
+						data: $scope.question
+					})
+						.success(function (data, status, headers, config) {
+							$mdDialog.hide(answer);
+							if (data == 'question saved') {
+								$mdToast.show($mdToast.simple()
+									.textContent('Dados salvos com sucesso')
+									.position('bottom left')
+									.hideDelay(3000));
+							}
+							else {
+								$mdToast.show($mdToast.simple()
+									.textContent('Dados não foram salvos')
+									.position('bottom left')
+									.hideDelay(3000));
+							}
+						});
+				}
+				else {
+					$http({
+						method: 'PUT',
+						url: './questions/id/' + $scope.question._id,
+						data: $scope.question
+					})
+						.success(function (data, status, headers, config) {
+							$mdDialog.hide(answer);
+							if (data == 'question saved') {
+								$mdToast.show($mdToast.simple()
+									.textContent('Dados salvos com sucesso')
+									.position('bottom left')
+									.hideDelay(3000));
+							}
+							else {
+								$mdToast.show($mdToast.simple()
+									.textContent('Dados não foram salvos')
+									.position('bottom left')
+									.hideDelay(3000));
+							}
+						});
+				}
+			}, function (err) {
+				$scope.uploadOK = 2;
+			});
+	};
+
+	$scope.upload = function () {
+		var formData = new FormData();
+		angular.forEach($scope.files, function (obj) {
+			formData.append('files[]', obj.lfFile);
+		});
+		$http.post('./questions/upload', formData, {
+			transformRequest: angular.identity,
+			headers: { 'Content-Type': undefined }
+		}).then(function (result) {
+			$scope.uploadOK = 1;
+		}, function (err) {
+			$scope.uploadOK = 2;
+		});
 	};
 }		

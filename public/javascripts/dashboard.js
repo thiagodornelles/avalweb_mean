@@ -9,7 +9,7 @@ var JSONtoForm = function(obj){
 	return str.join("&");
 };
 
-var app = angular.module("avalweb", ['ngMaterial', 'ngRoute']);
+var app = angular.module("avalweb", ['ngMaterial', 'ngRoute', 'lfNgMdFileInput']);
 
 //Service that keeps application data between index controller and anothers
 app.service('appData', function(){

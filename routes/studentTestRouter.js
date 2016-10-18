@@ -145,22 +145,29 @@ router.post('/starttest', function (req, res, next) {
 									category.questions = stUtil.getQuestionsFromCategory(category);
 
 									if (category.questions.length > 0) {
-										question = testStrat.nextQuestion('', category.questions, req);
 										var studTest = new studentTestModel();
 										studentModel.findOne({ email: req.session.passport.user.username })
-											.exec(function (err, student){
-											studTest.user = req.session.passport.user.username;
-											studTest.test = req.body._id;
-											studTest.student = student._id;
-											studTest.date = new Date();
-											studTest.finished = false;
-											studTest.actualCategory = 1;
-											studTest.numberRetries = 0;
-											studTest.save();
-											req.session.passport.user.test = studTest._id;
-											//Envia a questão
-											res.send(question);
-										});
+											.exec(function (err, student) {
+												studTest.user = req.session.passport.user.username;
+												studTest.test = req.body._id;
+												studTest.student = student._id;
+												studTest.date = new Date();
+												studTest.finished = false;
+												studTest.actualCategory = 1;
+												studTest.numberRetries = 0;
+												studTest.save(function (err, st) {
+													if (err) {
+														console.log(err);
+														res.send('end of test');
+													}
+													else {
+														req.session.passport.user.test = req.body._id;
+														question = testStrat.nextQuestion('', category.questions, req);
+														//Envia a questão
+														res.send(question);
+													}
+												});
+											});
 									}
 									else {
 										res.send("end of test");
@@ -174,21 +181,28 @@ router.post('/starttest', function (req, res, next) {
 					}
 				}
 				else if (result.type == CONSTS.EVAL_BY_QUESTIONS) {
-					question = testStrat.nextQuestion('', result.questions, req);
 					studentModel.findOne({ email: req.session.passport.user.username })
-					.exec(function (err, student){
-						var studTest = new studentTestModel();
-						studTest.user = req.session.passport.user.username;
-						studTest.test = req.body._id;
-						studTest.student = student._id;
-						studTest.date = new Date();
-						studTest.finished = false;
-						studTest.numberRetries = 0;
-						studTest.save();
-						req.session.passport.user.test = studTest._id;
-						//Envia a questão					
-						res.send(question);
-					});
+						.exec(function (err, student) {
+							var studTest = new studentTestModel();
+							studTest.user = req.session.passport.user.username;
+							studTest.test = req.body._id;
+							studTest.student = student._id;
+							studTest.date = new Date();
+							studTest.finished = false;
+							studTest.numberRetries = 0;
+							studTest.save(function (err, st) {
+								if (err) {
+									console.log(err);
+									res.send('end of test');
+								}
+								else {
+									req.session.passport.user.test = req.body._id;
+									question = testStrat.nextQuestion('', result.questions, req);
+									//Envia a questão
+									res.send(question);
+								}
+							});
+						});
 				}
 			}
 			else {
@@ -318,6 +332,7 @@ router.post('/nextquestion', function (req, res, next) {
 											}
 											else {
 												//**** Buscando nova questão *****
+												req.session.passport.user.test = req.body._id;
 												var question = testStrat.nextQuestion(rightAnswer, qtemp, req);
 
 												//Grava nova questão a responder
@@ -330,7 +345,7 @@ router.post('/nextquestion', function (req, res, next) {
 										// PROVA POR CATEGORIAS
 										//----------------------
 										else if (test.type == CONSTS.EVAL_BY_CATEGORIES) {
-
+											
 											//Buscar questões da próxima categoria
 											var actualCategory = studTest[0].actualCategory;
 											if (actualCategory >= test.categories.length) {
@@ -367,12 +382,8 @@ router.post('/nextquestion', function (req, res, next) {
 															}
 														}
 														if (category.questions.length > 0) {
-															//Objeto necessário para esta estrategia 
-															var userData = new Object();
-															userData.user = req.session.passport.user.username;
-															userData.test = req.body._id
-
-															question = testStrat.nextQuestion(rightAnswer, category.questions, userData);
+															req.session.passport.user.test = req.body._id;														
+															question = testStrat.nextQuestion(rightAnswer, category.questions, req);
 															studTest[0].user = req.session.passport.user.username;
 															studTest[0].test = req.body._id;
 															studTest[0].date = new Date();
@@ -383,7 +394,7 @@ router.post('/nextquestion', function (req, res, next) {
 															req.session.passport.user.test = studTest._id;
 															//Envia a questão
 															res.send(question);
-														}
+														}														
 														else {
 															studTest[0].finished = true;
 															studTest[0].save();

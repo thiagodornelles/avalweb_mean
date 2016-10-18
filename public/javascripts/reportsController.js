@@ -27,7 +27,7 @@ app.controller("reportController", function ($scope, $http, $mdDialog, $mdMedia,
 			},
 			targetEvent: ev,
 			clickOutsideToClose: true,
-			fullscreen: true			
+			fullscreen: true
 		})
 			.then(function (event) {
 				$scope.refreshList();
@@ -42,7 +42,7 @@ var reportDialogController = function ($scope, $mdDialog, $http, $mdToast, $mdMe
 	$scope.useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));
 	$scope.test = angular.copy(test);
 	$scope.test.date = new Date($scope.test.date);
-
+	
 	$scope.refreshList = function (filter) {
 		$http.get('/classes/search')
 			.then(function (res) {
@@ -50,6 +50,13 @@ var reportDialogController = function ($scope, $mdDialog, $http, $mdToast, $mdMe
 			},
 			function (res) {
 				$scope.classes = [];
+			});		
+		$http.get('/reports/studentswithscore/' + test._id)
+			.then(function (res) {
+				$scope.studentTests = res.data;
+			},
+			function (res) {
+				$scope.studentTests = [];
 			});
 	};
 
@@ -58,54 +65,5 @@ var reportDialogController = function ($scope, $mdDialog, $http, $mdToast, $mdMe
 
 	$scope.cancel = function () {
 		$mdDialog.cancel();
-	};
-
-	$scope.saveTest = function (event, id) {
-		//POST
-		if (!id) {
-			console.log($scope.test);
-			$http({
-				method: 'POST',
-				url: './tests',
-				data: $scope.test
-			})
-				.success(function (data, status, headers, config) {
-					$mdDialog.hide(event);
-					if (data == 'test saved') {
-						$mdToast.show($mdToast.simple()
-							.textContent('Dados salvos com sucesso')
-							.position('bottom left')
-							.hideDelay(3000));
-					}
-					else {
-						$mdToast.show($mdToast.simple()
-							.textContent('Dados não foram salvos')
-							.position('bottom left')
-							.hideDelay(3000));
-					}
-				});
-		}
-		else {
-			$http({
-				method: 'PUT',
-				url: './tests/id/' + $scope.test._id,
-				data: $scope.test
-			})
-				.success(function (data, status, headers, config) {
-					$mdDialog.hide(event);
-					if (data == 'test saved') {
-						$mdToast.show($mdToast.simple()
-							.textContent('Dados salvos com sucesso')
-							.position('bottom left')
-							.hideDelay(3000));
-					}
-					else {
-						$mdToast.show($mdToast.simple()
-							.textContent('Dados não foram salvos')
-							.position('bottom left')
-							.hideDelay(3000));
-					}
-				});
-		}
 	};
 }		

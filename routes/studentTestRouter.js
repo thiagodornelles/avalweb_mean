@@ -70,10 +70,11 @@ router.get('/finishedtest/:id', function (req, res, next) {
 		'user': req.session.passport.user.username,
 		'test': req.params.id //ID da avaliação
 	})
-		.limit(1).sort({ 'date': -1 })
+		.limit(1)
 		.exec(function (err, studTest) {
-			if (studTest.length > 0) {
-				res.send("test finished");
+			if (studTest.length > 0)
+			{
+				res.send(studTest[0]);
 			}
 			else {
 				res.send("test not finished");

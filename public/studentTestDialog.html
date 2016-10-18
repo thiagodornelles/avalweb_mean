@@ -39,7 +39,8 @@
 		<form>
 			<md-dialog-content>	
 				<md-content layout-padding>				
-					<div layout="column">	
+					<div layout="column">
+						<img ng-if="question.imagePath != ''" src="./uploads/{{question.imagePath}}"/>	
 						<h3>{{question.wording}}</h3>
 						<div layout="row">
 							<div flex="33">

@@ -178,3 +178,11 @@ fieldset.standard {
 	min-width: 32px;
 	width: 32px;
 }
+
+img {
+  display: block;
+  max-width:400px;
+  max-height:400px;
+  width: auto;
+  height: auto;
+}

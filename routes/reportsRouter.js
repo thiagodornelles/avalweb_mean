@@ -4,6 +4,7 @@ var path = require('path');
 var mongoose = require('mongoose');
 var testModel = require('../models/testsModel')
 var classModel = require('../models/classesModel');
+var studentTestModel = require('../models/studentTestsModel');
 var isLoggedIn = require('./baseMiddlewares');
 
 router.get('/', isLoggedIn, function (req, res, next) {
@@ -24,91 +25,29 @@ router.get('/id/:id', function (req, res, next) {
 router.get('/search', function (req, res, next) {
 	var query = testModel.find({ name: new RegExp(req.query.name, 'i') });
 	//.populate('categories').populate('questions');
-	query.exec(function (err, result) {
+	query.exec(function (err, result) {		
 		res.json(result);
 	});
 });
 
-router.post('/', function (req, res, next) {
-	if (req.body.name && req.body.date) {
-		var test = new testModel();
-		test.name = req.body.name;
-		test.date = req.body.date;
-		test.strategy = req.body.strategy;
-		test.type = req.body.type;
-		//Prova por Categorias
-		if (req.body.type == 1) {
-			for (var i = 0; i < req.body.selectedCategories.length; i++) {
-				test.categories.push(req.body.selectedCategories[i]._id);
-			}
-			test.questions = [];
+router.get('/studentswithscore/:test_id', function (req, res, next) {
+	var student_id = req.params.test_id;
+	studentTestModel.find({test: student_id})
+	.populate('answeredQuestions').populate('student').lean()
+	.exec(function (err, results) {
+		if(err){
+			console.log(err);
+			res.send([]);
 		}
-		//Prova por questões
-		else if (req.body.type == 2) {
-			for (var i = 0; i < req.body.selectedQuestions.length; i++) {
-				test.questions.push(req.body.selectedQuestions[i]._id);
-			}
-			test.categories = [];
-		}
-		test.classes = req.body.classes;
-		test.save(function (err) {
-			if (err)
-				res.send(err);
-			else
-				res.send('test saved');
-		});
-	}
-	else {
-		res.send('test not saved');
-	}
-
-});
-
-router.put('/id/:id', function (req, res, next) {
-	testModel.findById(req.params.id, function (err, result) {
-		if (req.body.name && req.body.date) {
-			result.name = req.body.name;
-			result.date = req.body.date;
-			result.questions = req.body.questions;
-			result.strategy = req.body.strategy;
-			result.type = req.body.type;
-			//Prova por Categorias
-			if (req.body.type == 1) {
-				result.categories = new Array();
-				for (var i = 0; i < req.body.selectedCategories.length; i++) {
-					result.categories.push(req.body.selectedCategories[i]._id);
+		else{		
+			for (i = 0; i < results.length; i++){
+				var total = 0;
+				for (j = 0; j < results[i].answersGrade.length; j++){
+					total += results[i].answersGrade[j];
 				}
-				result.questions = new Array();
+				results[i].grade = total/results[i].answersGrade.length;			 
 			}
-			//Prova por questões
-			else if (req.body.type == 2) {
-				result.questions = new Array();
-				for (var i = 0; i < req.body.selectedQuestions.length; i++) {
-					result.questions.push(req.body.selectedQuestions[i]._id);
-				}
-				result.categories = new Array();
-			}
-			result.classes = req.body.classes;
-			result.save(function (err) {
-				if (err)
-					res.send(err);
-				else
-					res.send('test saved');
-			});
-		}
-		else {
-			res.send('test not saved');
-		}
-	});
-});
-
-router.delete('/id/:id', function (req, res, next) {
-	var removeQuery = testModel.findByIdAndRemove(req.params.id);
-	removeQuery.exec(function (err) {
-		if (err)
-			res.send(err);
-		else {
-			res.send('test removed');
+			res.json(results);
 		}
 	});
 });

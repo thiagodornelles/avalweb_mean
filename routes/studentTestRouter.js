@@ -70,15 +70,15 @@ router.get('/finishedtest/:id', function (req, res, next) {
 		'user': req.session.passport.user.username,
 		'test': req.params.id //ID da avaliação
 	})
-	.limit(1).sort({ 'date': -1 })
-	.exec(function (err, studTest) {
-		if(studTest.length > 0){
-			res.send("test finished");
-		}
-		else{
-			res.send("test not finished");		
-		}
-	});
+		.limit(1).sort({ 'date': -1 })
+		.exec(function (err, studTest) {
+			if (studTest.length > 0) {
+				res.send("test finished");
+			}
+			else {
+				res.send("test not finished");
+			}
+		});
 });
 
 router.get('/search', function (req, res, next) {
@@ -147,17 +147,20 @@ router.post('/starttest', function (req, res, next) {
 									if (category.questions.length > 0) {
 										question = testStrat.nextQuestion('', category.questions, req);
 										var studTest = new studentTestModel();
-										studTest.user = req.session.passport.user.username;
-										studTest.test = req.body._id;
-										studTest.date = new Date();
-										studTest.finished = false;
-										studTest.actualCategory = 1;
-										studTest.numberRetries = 0;
-										studTest.save();
-
-										req.session.passport.user.test = studTest._id;
-										//Envia a questão
-										res.send(question);
+										studentModel.findOne({ email: req.session.passport.user.username })
+											.exec(function (err, student){
+											studTest.user = req.session.passport.user.username;
+											studTest.test = req.body._id;
+											studTest.student = student._id;
+											studTest.date = new Date();
+											studTest.finished = false;
+											studTest.actualCategory = 1;
+											studTest.numberRetries = 0;
+											studTest.save();
+											req.session.passport.user.test = studTest._id;
+											//Envia a questão
+											res.send(question);
+										});
 									}
 									else {
 										res.send("end of test");
@@ -172,17 +175,20 @@ router.post('/starttest', function (req, res, next) {
 				}
 				else if (result.type == CONSTS.EVAL_BY_QUESTIONS) {
 					question = testStrat.nextQuestion('', result.questions, req);
-					var studTest = new studentTestModel();
-					studTest.user = req.session.passport.user.username;
-					studTest.test = req.body._id;
-					studTest.date = new Date();
-					studTest.finished = false;					
-					studTest.numberRetries = 0;					
-					studTest.save();
-
-					req.session.passport.user.test = studTest._id;
-					//Envia a questão					
-					res.send(question);
+					studentModel.findOne({ email: req.session.passport.user.username })
+					.exec(function (err, student){
+						var studTest = new studentTestModel();
+						studTest.user = req.session.passport.user.username;
+						studTest.test = req.body._id;
+						studTest.student = student._id;
+						studTest.date = new Date();
+						studTest.finished = false;
+						studTest.numberRetries = 0;
+						studTest.save();
+						req.session.passport.user.test = studTest._id;
+						//Envia a questão					
+						res.send(question);
+					});
 				}
 			}
 			else {
@@ -195,18 +201,6 @@ router.post('/starttest', function (req, res, next) {
 router.post('/checkquestion', function (req, res, next) {
 
 	if (req.body.answer_id && req.body.question_id) {
-		//Marcando a resposta enviada pelo usuário
-		studentTestModel.find({
-			'user': req.session.passport.user.username,
-			'test': req.body._id //ID da avaliação
-		})
-			.limit(1)
-			.sort({ 'date': -1 })
-			.exec(function (err, studTest) {
-				studTest[0].answeredQuestions.push(req.body.question_id);
-				studTest[0].answers.push(req.body.answer_id);
-				studTest[0].save();
-			});
 		//Buscando a questão na base
 		questionModel.findById(req.body.question_id)
 			.exec(function (err, question) {
@@ -223,8 +217,24 @@ router.post('/checkquestion', function (req, res, next) {
 							break;
 						}
 					}
-					//Enviando a questão com as respostas e se foi acertada ou não
-					res.send(question);
+					//Marcando a resposta enviada pelo usuário
+					studentTestModel.find({
+						'user': req.session.passport.user.username,
+						'test': req.body._id //ID da avaliação
+					})
+						.limit(1)
+						.sort({ 'date': -1 })
+						.exec(function (err, studTest) {
+							studTest[0].answeredQuestions.push(req.body.question_id);
+							studTest[0].answers.push(req.body.answer_id);
+							if (question.right)
+								studTest[0].answersGrade.push(1);
+							else
+								studTest[0].answersGrade.push(0);
+							studTest[0].save();
+							//Enviando a questão com as respostas e se foi acertada ou não
+							res.send(question);
+						});
 				}
 				else {
 					res.end();
@@ -301,7 +311,7 @@ router.post('/nextquestion', function (req, res, next) {
 												}
 											}
 
-											if (qtemp.length <= 0) {												
+											if (qtemp.length <= 0) {
 												studTest[0].finished = true;
 												studTest[0].save();
 												res.send('end of test');

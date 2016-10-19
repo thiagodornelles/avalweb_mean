@@ -52,6 +52,18 @@ var testDialogController = function ($scope, $mdDialog, $http, test) {
 			.success(function (response, status) {
 				if (response != 'test not finished') {
 					console.log(response);
+					$scope.answeredQuestions = response.answeredQuestions;
+					$scope.answers = response.answers;
+					for (var i = 0; i < $scope.answeredQuestions.length; i++) {
+						var question = $scope.answeredQuestions[i];
+						var answer = $scope.answers[i];
+						for (var j = 0; j < question.answers.length; j++) {
+							if (question.answers[j]._id.toString() === answer) {
+								question.answers[j].studentAnswer = true;
+								break;
+							}
+						}
+					}					
 					$scope.form = 'reportForm';
 				}
 				else {

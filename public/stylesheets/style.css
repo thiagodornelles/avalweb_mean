@@ -186,3 +186,16 @@ img {
   width: auto;
   height: auto;
 }
+
+.list-item-report{
+	width: 100px;
+}
+
+th{
+	padding: 15px;
+}
+td{
+	text-align:center;
+	vertical-align:middle;
+	padding: 10px;
+}

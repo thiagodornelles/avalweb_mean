@@ -70,10 +70,10 @@ router.get('/finishedtest/:id', function (req, res, next) {
 		'user': req.session.passport.user.username,
 		'test': req.params.id //ID da avaliação
 	})
-		.limit(1)
+		.limit(1).populate('answeredQuestions')
 		.exec(function (err, studTest) {
 			if (studTest.length > 0)
-			{
+			{				
 				res.send(studTest[0]);
 			}
 			else {
@@ -337,8 +337,8 @@ router.post('/nextquestion', function (req, res, next) {
 												var question = testStrat.nextQuestion(rightAnswer, qtemp, req);
 
 												//Grava nova questão a responder
-												studTest[0].answeredQuestions.push(question._id);
-												studTest[0].save();
+												// studTest[0].answeredQuestions.push(question._id);
+												// studTest[0].save();
 												res.send(question);
 											}
 										}

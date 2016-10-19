@@ -25,9 +25,10 @@ app.controller("reportController", function ($scope, $http, $mdDialog, $mdMedia,
 			locals: {
 				test: q
 			},
-			targetEvent: ev,
+			// targetEvent: ev,
 			clickOutsideToClose: true,
-			fullscreen: true
+			fullscreen: true,
+			skipHide: true			
 		})
 			.then(function (event) {
 				$scope.refreshList();
@@ -37,12 +38,19 @@ app.controller("reportController", function ($scope, $http, $mdDialog, $mdMedia,
 	}
 });
 
+var reportTestDialogController = function ($scope, $mdDialog, test) {
+
+	$scope.cancel = function () {
+		$mdDialog.cancel();
+	};
+};
+
 
 var reportDialogController = function ($scope, $mdDialog, $http, $mdToast, $mdMedia, test) {
 	$scope.useFullScreen = ($mdMedia('sm') || $mdMedia('xs'));
 	$scope.test = angular.copy(test);
 	$scope.test.date = new Date($scope.test.date);
-	
+
 	$scope.refreshList = function (filter) {
 		$http.get('/classes/search')
 			.then(function (res) {
@@ -50,7 +58,7 @@ var reportDialogController = function ($scope, $mdDialog, $http, $mdToast, $mdMe
 			},
 			function (res) {
 				$scope.classes = [];
-			});		
+			});
 		$http.get('/reports/studentswithscore/' + test._id)
 			.then(function (res) {
 				$scope.studentTests = res.data;
@@ -59,6 +67,22 @@ var reportDialogController = function ($scope, $mdDialog, $http, $mdToast, $mdMe
 				$scope.studentTests = [];
 			});
 	};
+
+	$scope.openDialogReportTest = function (ev, t) {
+		$mdDialog.show({
+			controller: reportTestDialogController,
+			templateUrl: './reportTestDialog.html',
+			parent: angular.element(document.body),
+			locals: {
+				test: t
+			},
+			openFrom: angular.element(document.body),
+			clickOutsideToClose: false,			
+			fullscreen: true,
+			skipHide: true,
+
+		});
+	}
 
 	//Get initial list data
 	$scope.refreshList('');

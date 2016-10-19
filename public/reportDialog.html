@@ -1,8 +1,7 @@
 <md-dialog aria-label="Relatório de provas" flex>
 	<md-toolbar class="md-hue-2">
 		<div class="md-toolbar-tools">
-			<h2 ng-if="!useFullScreen">Relatório de provas</h2>
-			<span ng-if="!useFullScreen" flex></span>
+			<h2 >Relatório de provas</h2>			
 			<span flex></span>
 			<md-button class="md-icon-button" ng-click="cancel();">
 				<i class="material-icons">clear</i>
@@ -55,8 +54,10 @@
 					<fieldset class="standard" flex>
 						<legend>Alunos</legend>
 						<md-content>
-							<md-list flex>
-								<md-list-item id="{{s._id}}" ng-repeat="s in studentTests | filter:search | orderBy:['student.name']" flex>
+							<md-list flex>								
+								<md-list-item id="{{s._id}}"
+									ng-repeat="s in studentTests | filter:search | orderBy:['student.name']"
+									ng-click="openDialogReportTest($event, s)" flex class="list-item">
 									<div class="md-list-item-text" layout="column" style="min-width: 100px;">
 										<p>{{s.student.name | limitTo: 100}}</p>
 									</div>

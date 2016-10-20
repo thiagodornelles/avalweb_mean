@@ -28,7 +28,7 @@ app.controller("reportController", function ($scope, $http, $mdDialog, $mdMedia,
 			// targetEvent: ev,
 			clickOutsideToClose: true,
 			fullscreen: true,
-			skipHide: true			
+			skipHide: true
 		})
 			.then(function (event) {
 				$scope.refreshList();
@@ -38,12 +38,24 @@ app.controller("reportController", function ($scope, $http, $mdDialog, $mdMedia,
 	}
 });
 
-var reportTestDialogController = function ($scope, $mdDialog, test) {
+var reportTestDialogController = function ($scope, $http, $mdDialog, test) {
 
 	$scope.cancel = function () {
 		$mdDialog.cancel();
 	};
-};
+	$scope.answeredQuestions = test.answeredQuestions;
+	$scope.answers = test.answers;
+	for (var i = 0; i < $scope.answeredQuestions.length; i++) {
+		var question = $scope.answeredQuestions[i];
+		var answer = $scope.answers[i];
+		for (var j = 0; j < question.answers.length; j++) {
+			if (question.answers[j]._id.toString() === answer) {
+				question.answers[j].studentAnswer = true;
+				break;
+			}
+		}
+	}
+}
 
 
 var reportDialogController = function ($scope, $mdDialog, $http, $mdToast, $mdMedia, test) {
@@ -77,7 +89,7 @@ var reportDialogController = function ($scope, $mdDialog, $http, $mdToast, $mdMe
 				test: t
 			},
 			openFrom: angular.element(document.body),
-			clickOutsideToClose: false,			
+			clickOutsideToClose: false,
 			fullscreen: true,
 			skipHide: true,
 

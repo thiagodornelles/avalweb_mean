@@ -1,7 +1,7 @@
 <md-dialog aria-label="Questões respondidas" flex>
 	<md-toolbar class="md-hue-2">
 		<div class="md-toolbar-tools">
-			<h2>Questões respondidas</h2>			
+			<h2>Questões respondidas</h2>
 			<span flex></span>
 			<md-button class="md-icon-button" ng-click="cancel();">
 				<i class="material-icons">clear</i>
@@ -10,8 +10,68 @@
 	</md-toolbar>
 	<form>
 		<md-dialog-content>
-			<md-content layout-padding>				
+			<md-content layout-padding>
+				<md-list flex>
+					<md-list-item id="{{q._id}}" flex ng-repeat="q in answeredQuestions">
+						<div class="md-list-item-text" style="min-width:100%;" layout="column">
+							<h3>{{q.wording}}</h3>
+							<table>
+								<tr>
+									<th>Respostas</th>
+									<th>Correta</th>
+									<th>Marcada pelo usuário</th>
+								</tr>
+								<tr>
+									<td>{{q.answers[0].answer}}</td>
+									<td>
+										<i ng-if="q.answers[0].rightAnswer" class="material-icons">check_circle</i>
+									</td>
+									<td>
+										<i ng-if="q.answers[0].studentAnswer" class="material-icons">check_circle</i>
+									</td>
+								</tr>
+								<tr>
+									<td>{{q.answers[1].answer}}</td>
+									<td>
+										<i ng-if="q.answers[1].rightAnswer" class="material-icons">check_circle</i>
+									</td>
+									<td>
+										<i ng-if="q.answers[1].studentAnswer" class="material-icons">check_circle</i>
+									</td>
+								</tr>
+								<tr>
+									<td>{{q.answers[2].answer}}</td>
+									<td>
+										<i ng-if="q.answers[2].rightAnswer" class="material-icons">check_circle</i>
+									</td>
+									<td>
+										<i ng-if="q.answers[2].studentAnswer" class="material-icons">check_circle</i>
+									</td>
+								</tr>
+								<tr>
+									<td>{{q.answers[3].answer}}</td>
+									<td>
+										<i ng-if="q.answers[3].rightAnswer" class="material-icons">check_circle</i>
+									</td>
+									<td>
+										<i ng-if="q.answers[3].studentAnswer" class="material-icons">check_circle</i>
+									</td>
+								</tr>
+								<tr>
+									<td>{{q.answers[4].answer}}</td>
+									<td>
+										<i ng-if="q.answers[4].rightAnswer" class="material-icons">check_circle</i>
+									</td>
+									<td>
+										<i ng-if="q.answers[4].studentAnswer" class="material-icons">check_circle</i>
+									</td>
+								</tr>
+							</table>
+							<md-divider></md-divider>
+						</div>
+					</md-list-item>
+				</md-list>
 			</md-content>
 		</md-dialog-content>
-	</form>	
+	</form>
 </md-dialog>

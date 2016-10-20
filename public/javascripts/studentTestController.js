@@ -50,8 +50,7 @@ var testDialogController = function ($scope, $mdDialog, $http, test) {
 	$scope.finished = function () {
 		$http.get('/studenttests/finishedtest/' + test._id)
 			.success(function (response, status) {
-				if (response != 'test not finished') {
-					console.log(response);
+				if (response != 'test not finished') {					
 					$scope.answeredQuestions = response.answeredQuestions;
 					$scope.answers = response.answers;
 					for (var i = 0; i < $scope.answeredQuestions.length; i++) {

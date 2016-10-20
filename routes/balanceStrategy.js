@@ -37,7 +37,8 @@ var BalanceStrategy = function(){
 				//Uma nova tentativa em caso de erro da questao da categoria
 				if (studTest[0].numberRetries < 1){
 					//Repete mais uma questão da categoria
-					studTest[0].actualCategory--;
+					var actualCat = studTest[0].actualCategory;					
+					studTest[0].categoriesToAnswer.push(studTest[0].categoriesToAnswer[actualCat - 1]);				
 					studTest[0].numberRetries++ ;
 					studTest[0].save();
 				}

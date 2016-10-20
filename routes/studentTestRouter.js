@@ -55,11 +55,11 @@ router.get('/', isLoggedIn, function (req, res, next) {
 
 router.get('/id/:id', function (req, res, next) {
 	var query = testModel.findById(req.params.id);
-	query.exec(function (err, result) {
+	query.exec(function (err, test) {
 		if (err)
 			res.send(err);
 		else {
-			res.json(result);
+			res.json(test);
 		}
 	});
 });
@@ -91,9 +91,9 @@ router.get('/search', function (req, res, next) {
 					.exec(function (err, clas) {
 						if (clas) {
 							testModel.find({ classes: clas._id }, '-questions')
-								.exec(function (err, result) {
-									if (result)
-										res.json(result);
+								.exec(function (err, test) {
+									if (test)
+										res.json(test);
 									else
 										res.json([]);
 								});
@@ -112,23 +112,23 @@ router.post('/starttest', function (req, res, next) {
 	var query = testModel.findById(req.body._id)
 		.populate({ path: 'questions', select: '-answers.feedback -answers.rightAnswer' });
 
-	query.exec(function (err, result) {
+	query.exec(function (err, test) {
 		if (err)
 			res.send(err);
 		else {
-			if (result.strategy == CONSTS.FIXED_ORDER)
+			if (test.strategy == CONSTS.FIXED_ORDER)
 				testStrat.setStrategy(def);
-			else if (result.strategy == CONSTS.DIF_BALANCE)
+			else if (test.strategy == CONSTS.DIF_BALANCE)
 				testStrat.setStrategy(difBalance);
 
 			//Se existe, grava a informação do usuário no log da prova
-			if (result._id == req.body._id) {
+			if (test._id == req.body._id) {
 				//Solicita uma questão para começar.
 				var question;
-				if (result.type == CONSTS.EVAL_BY_CATEGORIES) {
-					if (result.categories.length > 0) {
+				if (test.type == CONSTS.EVAL_BY_CATEGORIES) {
+					if (test.categories.length > 0) {
 						//Popular três niveis de subCategorias e suas questões
-						var q = categoryModel.findById(result.categories[0])
+						var q = categoryModel.findById(test.categories[0])
 							.populate(
 							{
 								path: 'subCategories', model: 'Category',
@@ -154,6 +154,8 @@ router.post('/starttest', function (req, res, next) {
 												studTest.student = student._id;
 												studTest.date = new Date();
 												studTest.finished = false;
+												studTest.answeredCategories.push(category._id);
+												studTest.categoriesToAnswer = test.categories;
 												studTest.actualCategory = 1;
 												studTest.numberRetries = 0;
 												studTest.save(function (err, st) {
@@ -181,7 +183,7 @@ router.post('/starttest', function (req, res, next) {
 						res.send("end of test");
 					}
 				}
-				else if (result.type == CONSTS.EVAL_BY_QUESTIONS) {
+				else if (test.type == CONSTS.EVAL_BY_QUESTIONS) {
 					studentModel.findOne({ email: req.session.passport.user.username })
 						.exec(function (err, student) {
 							var studTest = new studentTestModel();
@@ -198,7 +200,7 @@ router.post('/starttest', function (req, res, next) {
 								}
 								else {
 									req.session.passport.user.test = req.body._id;
-									question = testStrat.nextQuestion('', result.questions, req);
+									question = testStrat.nextQuestion('', test.questions, req);
 									//Envia a questão
 									res.send(question);
 								}
@@ -349,14 +351,14 @@ router.post('/nextquestion', function (req, res, next) {
 											
 											//Buscar questões da próxima categoria
 											var actualCategory = studTest[0].actualCategory;
-											if (actualCategory >= test.categories.length) {
+											if (actualCategory >= studTest[0].categoriesToAnswer.length) {
 												studTest[0].finished = true;
 												studTest[0].save();
 												res.send("end of test");
 												return;
 											}
 											//Popular três niveis de subCategorias e suas questões
-											var q = categoryModel.findById(test.categories[actualCategory])
+											var q = categoryModel.findById(studTest[0].categoriesToAnswer[actualCategory])
 												.populate(
 												{
 													path: 'subCategories', model: 'Category',

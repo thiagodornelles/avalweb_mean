@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 var mongoose = require('mongoose');
+var async = require('async');
 var testModel = require('../models/testsModel');
 var classModel = require('../models/classesModel');
 var studentModel = require('../models/studentsModel');
@@ -72,8 +73,7 @@ router.get('/finishedtest/:id', function (req, res, next) {
 	})
 		.limit(1).populate('answeredQuestions')
 		.exec(function (err, studTest) {
-			if (studTest.length > 0)
-			{				
+			if (studTest.length > 0) {
 				res.send(studTest[0]);
 			}
 			else {
@@ -156,7 +156,10 @@ router.post('/starttest', function (req, res, next) {
 												studTest.finished = false;
 												studTest.answeredCategories.push(category._id);
 												studTest.categoriesToAnswer = test.categories;
-												studTest.actualCategory = 1;
+												for (i = 0; i < test.categories.length; i++){
+													studTest.repeatedCategory.push(false);
+												}
+												studTest.actualCategory = 0;
 												studTest.numberRetries = 0;
 												studTest.save(function (err, st) {
 													if (err) {
@@ -348,63 +351,83 @@ router.post('/nextquestion', function (req, res, next) {
 										// PROVA POR CATEGORIAS
 										//----------------------
 										else if (test.type == CONSTS.EVAL_BY_CATEGORIES) {
-											
 											//Buscar questões da próxima categoria
 											var actualCategory = studTest[0].actualCategory;
-											if (actualCategory >= studTest[0].categoriesToAnswer.length) {
+											if (actualCategory > (studTest[0].categoriesToAnswer.length) - 1) {
 												studTest[0].finished = true;
 												studTest[0].save();
 												res.send("end of test");
 												return;
 											}
-											//Popular três niveis de subCategorias e suas questões
-											var q = categoryModel.findById(studTest[0].categoriesToAnswer[actualCategory])
-												.populate(
-												{
-													path: 'subCategories', model: 'Category',
-													populate: { path: 'subCategories', model: 'Category' }
-												});
-											q.exec(function (err, category) {
-												categoryModel.populate(
-													category,
-													{
-														path: 'questions subCategories.questions subCategories.subCategories.questions',
-														model: 'Question'
-													},
-													function (err, category) {
-														//Pega as questões na hierarquia
-														category.questions = stUtil.getQuestionsFromCategory(category);
-														//Remoção das questões já respondidas											
-														var questionsAns = studTest[0].answeredQuestions;
-														for (var i = category.questions.length - 1; i > -1; i--) {
-															for (var j = 0; j < questionsAns.length; j++) {
-																if (questionsAns[j].toString() == category.questions[i]._id.toString()) {
-																	category.questions.splice(i, 1);
-																	break;
+											var ok = true;
+											async.whilst(
+												function () { return ok; },
+												function (callback) {
+													if (actualCategory > (studTest[0].categoriesToAnswer.length) - 1) {
+														studTest[0].finished = true;
+														studTest[0].save();														
+														ok = true;
+														res.send("end of test");
+														return;																																								
+													}		
+													//Popular três niveis de subCategorias e suas questões
+													var q = categoryModel.findById(studTest[0].categoriesToAnswer[actualCategory])
+														.populate(
+														{
+															path: 'subCategories', model: 'Category',
+															populate: { path: 'subCategories', model: 'Category' }
+														});
+													q.exec(function (err, category) {
+														categoryModel.populate(
+															category,
+															{
+																path: 'questions subCategories.questions subCategories.subCategories.questions',
+																model: 'Question'
+															},
+															function (err, category) {
+																//Pega as questões na hierarquia
+																category.questions = stUtil.getQuestionsFromCategory(category);
+																//Remoção das questões já respondidas											
+																var questionsAns = studTest[0].answeredQuestions;
+																for (var i = category.questions.length - 1; i > -1; i--) {
+																	for (var j = 0; j < questionsAns.length; j++) {
+																		if (questionsAns[j].toString() == category.questions[i]._id.toString()) {
+																			category.questions.splice(i, 1);
+																			break;
+																		}
+																	}
 																}
-															}
-														}
-														if (category.questions.length > 0) {
-															req.session.passport.user.test = req.body._id;														
-															question = testStrat.nextQuestion(rightAnswer, category.questions, req);
-															studTest[0].user = req.session.passport.user.username;
-															studTest[0].test = req.body._id;
-															studTest[0].date = new Date();
-															studTest[0].answeredCategories.push(category._id);
-															studTest[0].actualCategory++;
-															studTest[0].save();
+																if (category.questions.length > 0) {
+																	req.session.passport.user.test = req.body._id;
+																	question = testStrat.nextQuestion(rightAnswer, category.questions, req);
+																	studTest[0].user = req.session.passport.user.username;
+																	studTest[0].test = req.body._id;
+																	studTest[0].date = new Date();
+																	studTest[0].answeredCategories.push(category._id);																	
+																	studTest[0].actualCategory++;
+																	actualCategory = studTest[0].actualCategory;																	
+																	studTest[0].save();
 
-															req.session.passport.user.test = studTest._id;
-															//Envia a questão
-															res.send(question);
-														}														
-														else {
-															studTest[0].finished = true;
-															studTest[0].save();
-															res.send("end of test");
-														}
-													})
-											});
+																	req.session.passport.user.test = studTest._id;
+																	//Envia a questão
+																	res.send(question);
+																	ok = false;
+																	callback();
+																}
+																else {
+																	ok = true;																	
+																	studTest[0].actualCategory++;
+																	actualCategory = studTest[0].actualCategory;
+																	studTest[0].save();
+																	callback();
+																}
+															})
+													});
+												},
+												function (err) {
+													console.log(err);
+												}
+											);											
 										}
 									});
 							}

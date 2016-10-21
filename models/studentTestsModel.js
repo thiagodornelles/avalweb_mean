@@ -10,9 +10,11 @@ var studentTestSchema = new mongoose.Schema({
 	answeredCategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
 	answers: [mongoose.Schema.Types.ObjectId],
 	answersGrade: [Number],
-	categoriesToAnswer: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],			
+	categoriesToAnswer: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
+	repeatedCategory: [Boolean],			
 	actualCategory: Number,
 	numberRetries: Number
+
 });
 
 module.exports = mongoose.model('StudentTest', studentTestSchema);

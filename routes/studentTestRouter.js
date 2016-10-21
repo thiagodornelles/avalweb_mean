@@ -159,7 +159,7 @@ router.post('/starttest', function (req, res, next) {
 												for (i = 0; i < test.categories.length; i++){
 													studTest.repeatedCategory.push(false);
 												}
-												studTest.actualCategory = 0;
+												studTest.actualCategory = 1;
 												studTest.numberRetries = 0;
 												studTest.save(function (err, st) {
 													if (err) {

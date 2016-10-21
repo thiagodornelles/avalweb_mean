@@ -10,7 +10,7 @@
 			<md-subheader ng-if="questions.length > 1" class="md-no-sticky">
 				{{questions.length}} resultados
 			</md-subheader>			
-			<md-list-item id="{{q._id}}" flex class="list-item" ng-repeat="q in questions"
+			<md-list-item id="{{q._id}}" flex class="list-item" ng-repeat="q in questions | orderBy:['category._id']"
 				ng-click="openDialogQuestion($event, q, categories)">
 				<div class="md-list-item-text" layout="column">					
 					<h3>{{q.category.name}}</h3>

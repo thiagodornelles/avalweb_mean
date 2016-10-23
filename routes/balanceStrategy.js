@@ -34,11 +34,10 @@ var BalanceStrategy = function () {
 			})
 				.limit(1).sort({ 'date': -1 })
 				.exec(function (err, studTest) {
-					//Uma nova tentativa em caso de erro da questao da categoria					
+					var actualCat = studTest[0].actualCategory;										
 					//Repete mais uma questão da categoria
-					var actualCat = studTest[0].actualCategory;
-					if (!studTest[0].repeatedCategory[actualCat]) {
-						studTest[0].categoriesToAnswer.push(studTest[0].categoriesToAnswer[actualCat]);
+					if (!studTest[0].repeatedCategory[actualCat-1]) {
+						studTest[0].categoriesToAnswer.push(studTest[0].categoriesToAnswer[actualCat-1]);
 						studTest[0].repeatedCategory.push(true);
 					}
 					studTest[0].numberRetries++;

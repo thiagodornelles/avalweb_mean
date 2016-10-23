@@ -353,7 +353,7 @@ router.post('/nextquestion', function (req, res, next) {
 										else if (test.type == CONSTS.EVAL_BY_CATEGORIES) {
 											//Buscar questões da próxima categoria
 											var actualCategory = studTest[0].actualCategory;
-											if (actualCategory > (studTest[0].categoriesToAnswer.length) - 1) {
+											if (actualCategory > (studTest[0].categoriesToAnswer.length - 1) && rightAnswer) {
 												studTest[0].finished = true;
 												studTest[0].save();
 												res.send("end of test");

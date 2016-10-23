@@ -19,15 +19,17 @@ StudentTestUtil.prototype = {
     getQuestionsFromCategory: function(category){
 		var questions = new Array();
 		//Juntando as questões em um único array
-		for (var i = 0; i < category.subCategories.length; i++) {
-			var subs = category.subCategories[i].subCategories;										
-			for (var j = 0; j < subs.length; j++) {			
-				questions = questions.concat(subs[j].questions);				
-			}			
-			questions = questions.concat(category.subCategories[i].questions);
+		if(category){
+			for (var i = 0; i < category.subCategories.length; i++) {
+				var subs = category.subCategories[i].subCategories;										
+				for (var j = 0; j < subs.length; j++) {			
+					questions = questions.concat(subs[j].questions);				
+				}			
+				questions = questions.concat(category.subCategories[i].questions);
+			}
+			questions = questions.concat(category.questions);
+			questions.reverse();		
 		}
-		questions = questions.concat(category.questions);
-		questions.reverse();		
 		return questions;
 	}
 };

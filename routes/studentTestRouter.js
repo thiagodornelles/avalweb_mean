@@ -363,13 +363,13 @@ router.post('/nextquestion', function (req, res, next) {
 											async.whilst(
 												function () { return ok; },
 												function (callback) {
-													if (actualCategory > (studTest[0].categoriesToAnswer.length) - 1) {
+													if (actualCategory > (studTest[0].categoriesToAnswer.length) - 1 && rightAnswer) {
 														studTest[0].finished = true;
 														studTest[0].save();														
 														ok = true;
 														res.send("end of test");
 														return;																																								
-													}		
+													}													
 													//Popular três niveis de subCategorias e suas questões
 													var q = categoryModel.findById(studTest[0].categoriesToAnswer[actualCategory])
 														.populate(
@@ -384,42 +384,50 @@ router.post('/nextquestion', function (req, res, next) {
 																path: 'questions subCategories.questions subCategories.subCategories.questions',
 																model: 'Question'
 															},
-															function (err, category) {
-																//Pega as questões na hierarquia
-																category.questions = stUtil.getQuestionsFromCategory(category);
-																//Remoção das questões já respondidas											
-																var questionsAns = studTest[0].answeredQuestions;
-																for (var i = category.questions.length - 1; i > -1; i--) {
-																	for (var j = 0; j < questionsAns.length; j++) {
-																		if (questionsAns[j].toString() == category.questions[i]._id.toString()) {
-																			category.questions.splice(i, 1);
-																			break;
-																		}
-																	}
-																}
-																if (category.questions.length > 0) {
-																	req.session.passport.user.test = req.body._id;
-																	question = testStrat.nextQuestion(rightAnswer, category.questions, req);
-																	studTest[0].user = req.session.passport.user.username;
-																	studTest[0].test = req.body._id;
-																	studTest[0].date = new Date();
-																	studTest[0].answeredCategories.push(category._id);																	
-																	studTest[0].actualCategory++;
-																	actualCategory = studTest[0].actualCategory;																	
-																	studTest[0].save();
-
-																	req.session.passport.user.test = studTest._id;
-																	//Envia a questão
-																	res.send(question);
+															function (err, category) {																																															
+																if (!category){																
+																	res.send("end of test");
+																	//Se não achou a categoria deve sair do loop
 																	ok = false;
 																	callback();
 																}
 																else {
-																	ok = true;																	
-																	studTest[0].actualCategory++;
-																	actualCategory = studTest[0].actualCategory;
-																	studTest[0].save();
-																	callback();
+																	//Pega as questões na hierarquia																
+																	category.questions = stUtil.getQuestionsFromCategory(category);
+																	//Remoção das questões já respondidas											
+																	var questionsAns = studTest[0].answeredQuestions;
+																	for (var i = category.questions.length - 1; i > -1; i--) {
+																		for (var j = 0; j < questionsAns.length; j++) {
+																			if (questionsAns[j].toString() == category.questions[i]._id.toString()) {
+																				category.questions.splice(i, 1);
+																				break;
+																			}
+																		}
+																	}
+																	if (category.questions.length > 0) {
+																		req.session.passport.user.test = req.body._id;
+																		var anyData = { req: req, studTest: studTest[0]};
+																		question = testStrat.nextQuestion(rightAnswer, category.questions, anyData);																	
+																		studTest[0].user = req.session.passport.user.username;
+																		studTest[0].test = req.body._id;
+																		studTest[0].date = new Date();
+																		studTest[0].answeredCategories.push(category._id);																	
+																		studTest[0].actualCategory++;
+																		actualCategory = studTest[0].actualCategory;																	
+																		studTest[0].save();
+																		req.session.passport.user.test = studTest._id;
+																		//Envia a questão
+																		res.send(question);
+																		ok = false;
+																		callback();
+																	}
+																	else {
+																		ok = true;																	
+																		studTest[0].actualCategory++;
+																		actualCategory = studTest[0].actualCategory;
+																		studTest[0].save();
+																		callback();
+																	}
 																}
 															})
 													});

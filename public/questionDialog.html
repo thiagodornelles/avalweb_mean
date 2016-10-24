@@ -17,11 +17,8 @@
 					</textarea>
 				</md-input-container>				
 				<label ng-if="question.imagePath">{{question.imagePath}}</label>
-				<!--<label ng-if="uploadOK == 2">Erro ao enviar arquivo</label>-->
-				<lf-ng-md-file-input lf-files='files' progress> </lf-ng-md-file-input>
-				<!--<md-button ng-click="upload()">
-					Enviar imagem
-				</md-button>									-->
+				<!--<label ng-if="uploadOK == 2">Erro ao enviar arquivo</label>-->				
+				<lf-ng-md-file-input lf-files='files' accept="image/*" preview> </lf-ng-md-file-input>				
 				<md-input-container class="md-block">
 					<label>Dificuldade:</label>
 					<md-select ng-model="question.difficulty">

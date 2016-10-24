@@ -8,7 +8,7 @@ var isLoggedIn = require('./baseMiddlewares');
 var RouterUtils = require('./routerUtils');
 var multer = require('multer');
 var rUtils = new RouterUtils();
-
+var fs = require('fs');
 
 //MULTER CONFIGS
 var storage = multer.diskStorage({
@@ -103,7 +103,7 @@ router.put('/id/:id', function (req, res, next) {
 			var previousCategory = result.category;
 			result.category = req.body.category;
 			result.difficulty = req.body.difficulty;
-			result.imagePath = req.body.imagePath.data;
+			result.imagePath = req.body.imagePath;
 			result.answers[0] = req.body.answers[0];
 			result.answers[1] = req.body.answers[1];
 			result.answers[2] = req.body.answers[2];
@@ -159,6 +159,11 @@ router.delete('/id/:id', function (req, res, next) {
 		if (err)
 			res.send(err);
 		else {
+			//Remove arquivo se existe
+			if (question.imagePath != '') {
+				var filePath = __dirname + '/../public/uploads/' + question.imagePath; 
+				fs.unlinkSync(filePath);
+			}
 			var q = categoryModel.findById(question.category);
 			q.exec(function (err, category) {
 				if (category) {

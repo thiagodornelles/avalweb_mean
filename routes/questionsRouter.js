@@ -12,14 +12,14 @@ var fs = require('fs');
 
 //MULTER CONFIGS
 var storage = multer.diskStorage({
-	destination: function (req, file, cb) {		
-		cb(null, __dirname + '/../public/uploads');		
+	destination: function (req, file, cb) {
+		cb(null, __dirname + '/../public/uploads');
 	},
 	filename: function (req, file, cb) {
 		var s = file.originalname.split('.');
-		var extension = s[s.length-1];
+		var extension = s[s.length - 1];
 		var filename = 'f' + Math.random().toString(36).slice(-6) + Date.now() + '.' + extension;
-		cb(null, filename);		
+		cb(null, filename);
 	}
 });
 var upload = multer({ "storage": storage });
@@ -42,10 +42,12 @@ router.get('/id/:id', function (req, res, next) {
 });
 
 router.get('/search', function (req, res, next) {
-	var query = questionModel.find({
-		$or:
-		[{ wording: new RegExp(req.query.filter, 'i') }]
-	})
+	var query = questionModel.find(
+		{
+			wording: new RegExp(req.query.filter, 'i'),
+			owner: req.session.passport.user.username
+		}
+	)
 		.populate({ path: 'category', model: 'Category' });
 	query.exec(function (err, result) {
 		res.json(result);
@@ -53,10 +55,10 @@ router.get('/search', function (req, res, next) {
 });
 
 router.post('/upload', type, function (req, res, next) {
-	if(req.files.length == 1){
+	if (req.files.length == 1) {
 		res.send(req.files[0].filename);
 	}
-	else{
+	else {
 		res.send('');
 	}
 });
@@ -67,14 +69,15 @@ router.post('/', type, function (req, res, next) {
 		question.wording = req.body.wording;
 		question.category = req.body.category;
 		question.difficulty = req.body.difficulty;
+		question.owner = req.session.passport.user.username;
 		question.imagePath = req.body.imagePath.data;
-		if(!req.body.answers)
+		if (!req.body.answers)
 			req.body.answers = new Array();
 		question.answers.push(req.body.answers[0]);
 		question.answers.push(req.body.answers[1]);
 		question.answers.push(req.body.answers[2]);
 		question.answers.push(req.body.answers[3]);
-		question.answers.push(req.body.answers[4]);		
+		question.answers.push(req.body.answers[4]);
 		question.save(function (err) {
 			if (err)
 				res.send(err);
@@ -103,20 +106,21 @@ router.put('/id/:id', function (req, res, next) {
 			var previousCategory = result.category;
 			result.category = req.body.category;
 			result.difficulty = req.body.difficulty;
+			result.owner = req.session.passport.user.username;
 			result.imagePath = req.body.imagePath;
 			result.answers[0] = req.body.answers[0];
 			result.answers[1] = req.body.answers[1];
 			result.answers[2] = req.body.answers[2];
 			result.answers[3] = req.body.answers[3];
-			result.answers[4] = req.body.answers[4];			
+			result.answers[4] = req.body.answers[4];
 			result.save(function (err, result) {
 				if (err)
 					res.send(err);
 				else {
-					if (req.body.category == undefined){
+					if (req.body.category == undefined) {
 						req.body.category = new Object();
 						req.body.category._id = '';
-					}			
+					}
 					//Mudou categoria
 					if (req.body.category._id != previousCategory) {
 						//Se anteriormente não tinha categoria específica, não remove
@@ -161,8 +165,16 @@ router.delete('/id/:id', function (req, res, next) {
 		else {
 			//Remove arquivo se existe
 			if (question.imagePath != '') {
-				var filePath = __dirname + '/../public/uploads/' + question.imagePath; 
-				fs.unlinkSync(filePath);
+				var filePath = __dirname + '/../public/uploads/' + question.imagePath;				
+				fs.stat(filePath, function (err, stats) {
+					if (err) {
+						return console.error(err);
+					}
+					fs.unlink(filePath, function (err) {
+						if (err) return console.log(err);
+						console.log('file deleted successfully');
+					});
+				});
 			}
 			var q = categoryModel.findById(question.category);
 			q.exec(function (err, category) {

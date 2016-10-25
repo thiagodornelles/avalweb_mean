@@ -14,7 +14,6 @@ var studentTestSchema = new mongoose.Schema({
 	repeatedCategory: [Boolean],			
 	actualCategory: Number,
 	numberRetries: Number
-
 });
 
 module.exports = mongoose.model('StudentTest', studentTestSchema);

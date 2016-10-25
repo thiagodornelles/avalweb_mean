@@ -12,8 +12,8 @@ router.get('/', isLoggedIn, function(req, res, next) {
 	return next();
 });
 
-router.get('/id/:id', function(req, res, next) {
-	var query = categoryModel.findById(req.params.id);
+router.get('/id/:id', function(req, res, next) {		
+	var query = categoryModel.findById(req.params.id);	
 	query.exec(function(err, result) {
 		if (err)
 			res.send(err);
@@ -25,7 +25,8 @@ router.get('/id/:id', function(req, res, next) {
 
 router.get('/search', function(req, res, next) {
 	var query = categoryModel.find({
-			name: new RegExp(req.query.filter, 'i')
+			name: new RegExp(req.query.filter, 'i'),
+			owner: req.session.passport.user.username
 		})
 		.populate({
 			path: 'subCategories',
@@ -44,6 +45,7 @@ router.post('/', function(req, res, next) {
 		var category = new categoryModel();
 		category.name = req.body.name;
 		category.superCategory = req.body.superCategory;
+		category.owner = req.session.passport.user.username;
 		category.save(function(err, cat) {
 			if (err)
 				res.send(err);
@@ -75,6 +77,7 @@ router.put('/id/:id', function(req, res, next) {
 			result.name = req.body.name;
 			var prevSuperCategory = result.superCategory;
 			result.superCategory = req.body.superCategory;
+			result.owner = req.session.passport.user.username;
 			result.save(function(err) {
 				if (err)
 					res.send(err);

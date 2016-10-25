@@ -23,7 +23,12 @@ router.get('/id/:id', function (req, res, next) {
 });
 
 router.get('/search', function (req, res, next) {
-	var query = testModel.find({ name: new RegExp(req.query.name, 'i') }).populate('categories').populate('questions');
+	var query = testModel.find(
+		{
+			name: new RegExp(req.query.name, 'i'),
+			owner: req.session.passport.user.username
+		})
+	.populate('categories').populate('questions');
 	query.exec(function (err, result) {
 		res.json(result);
 	});
@@ -35,6 +40,7 @@ router.post('/', function (req, res, next) {
 		test.name = req.body.name;
 		test.date = req.body.date;
 		test.strategy = req.body.strategy;
+		test.owner = req.session.passport.user.username;
 		test.type = req.body.type;
 		//Prova por Categorias
 		if (req.body.type == 1) {
@@ -70,6 +76,7 @@ router.put('/id/:id', function (req, res, next) {
 			result.name = req.body.name;
 			result.date = req.body.date;
 			result.questions = req.body.questions;
+			result.owner = req.session.passport.user.username;
 			result.strategy = req.body.strategy;
 			result.type = req.body.type;
 			//Prova por Categorias

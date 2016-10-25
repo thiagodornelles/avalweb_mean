@@ -7,7 +7,8 @@ var testSchema = new mongoose.Schema({
 	categories : [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
 	classes : [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }],
 	strategy : String,
-	type: Number
+	type: Number,
+	owner: String
 });
 
 module.exports = mongoose.model('Test', testSchema);

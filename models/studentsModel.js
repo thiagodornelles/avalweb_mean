@@ -4,7 +4,7 @@ var studentSchema = new mongoose.Schema({
 	name : String,
 	birthDate : Date,
 	photo : Buffer,
-	email: String
+	email: String	
 });
 
 module.exports = mongoose.model('Student', studentSchema);

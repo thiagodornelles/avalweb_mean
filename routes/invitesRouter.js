@@ -45,7 +45,7 @@ router.post('/', function (req, res, next) {
                             subject: "Convite para acesso ao AvalWeb", // subject
                             text: "Olá, " + contact.name + "!\n\n" +
                             "Você recebeu um convite para acesso ao AvalWeb.\n\n" +
-                            "Acesse o link ... e utilize os dados abaixo para acessar o sistema:\n\n" +
+                            "Acesse o link https://avalweb.herokuapp.com e utilize os dados abaixo para acessar o sistema:\n\n" +
                             "Usuário: " + contact.email + "\n" +
                             "Senha: " + password
                         }, function (error, response) {  //callback

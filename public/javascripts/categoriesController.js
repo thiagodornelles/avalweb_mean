@@ -78,7 +78,7 @@ var categoryDialogController = function($scope, $mdDialog, $http, $mdToast, cate
 
 	var toRemove = new Array();
 	if (category != ''){
-		//Remover a categoria propria categoria para evitar autoreferencia infinita	
+		//Remover a categoria propria categoria para evitar autorreferencia infinita	
 		for (var i = 0; i < categories.length; i++) {
 			if (categories[i]._id.toString() == category._id.toString()){
 				$scope.categories.splice(i, 1);

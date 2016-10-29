@@ -87,13 +87,13 @@ router.get('/search', function (req, res, next) {
 	studentModel.findOne({ email: username })
 		.exec(function (err, student) {
 			if (student) {
-				classModel.findOne({ students: student._id })
-					.exec(function (err, clas) {
-						if (clas) {
-							testModel.find({ classes: clas._id }, '-questions')
-								.exec(function (err, test) {
-									if (test)
-										res.json(test);
+				classModel.find({ students: student._id })
+					.exec(function (err, classes) {
+						if (classes) {
+							testModel.find({ classes: { $in: classes } }, '-questions')
+								.exec(function (err, tests) {
+									if (tests)
+										res.json(tests);
 									else
 										res.json([]);
 								});
@@ -156,7 +156,7 @@ router.post('/starttest', function (req, res, next) {
 												studTest.finished = false;
 												studTest.answeredCategories.push(category._id);
 												studTest.categoriesToAnswer = test.categories;
-												for (i = 0; i < test.categories.length; i++){
+												for (i = 0; i < test.categories.length; i++) {
 													studTest.repeatedCategory.push(false);
 												}
 												studTest.actualCategory = 1;
@@ -365,11 +365,11 @@ router.post('/nextquestion', function (req, res, next) {
 												function (callback) {
 													if (actualCategory > (studTest[0].categoriesToAnswer.length) - 1 && rightAnswer) {
 														studTest[0].finished = true;
-														studTest[0].save();														
+														studTest[0].save();
 														ok = true;
 														res.send("end of test");
-														return;																																								
-													}													
+														return;
+													}
 													//Popular três niveis de subCategorias e suas questões
 													var q = categoryModel.findById(studTest[0].categoriesToAnswer[actualCategory])
 														.populate(
@@ -384,8 +384,8 @@ router.post('/nextquestion', function (req, res, next) {
 																path: 'questions subCategories.questions subCategories.subCategories.questions',
 																model: 'Question'
 															},
-															function (err, category) {																																															
-																if (!category){																
+															function (err, category) {
+																if (!category) {
 																	res.send("end of test");
 																	//Se não achou a categoria deve sair do loop
 																	ok = false;
@@ -406,14 +406,14 @@ router.post('/nextquestion', function (req, res, next) {
 																	}
 																	if (category.questions.length > 0) {
 																		req.session.passport.user.test = req.body._id;
-																		var anyData = { req: req, studTest: studTest[0]};
-																		question = testStrat.nextQuestion(rightAnswer, category.questions, anyData);																	
+																		var anyData = { req: req, studTest: studTest[0] };
+																		question = testStrat.nextQuestion(rightAnswer, category.questions, anyData);
 																		studTest[0].user = req.session.passport.user.username;
 																		studTest[0].test = req.body._id;
 																		studTest[0].date = new Date();
-																		studTest[0].answeredCategories.push(category._id);																	
+																		studTest[0].answeredCategories.push(category._id);
 																		studTest[0].actualCategory++;
-																		actualCategory = studTest[0].actualCategory;																	
+																		actualCategory = studTest[0].actualCategory;
 																		studTest[0].save();
 																		req.session.passport.user.test = studTest._id;
 																		//Envia a questão
@@ -422,7 +422,7 @@ router.post('/nextquestion', function (req, res, next) {
 																		callback();
 																	}
 																	else {
-																		ok = true;																	
+																		ok = true;
 																		studTest[0].actualCategory++;
 																		actualCategory = studTest[0].actualCategory;
 																		studTest[0].save();
@@ -435,7 +435,7 @@ router.post('/nextquestion', function (req, res, next) {
 												function (err) {
 													console.log(err);
 												}
-											);											
+											);
 										}
 									});
 							}

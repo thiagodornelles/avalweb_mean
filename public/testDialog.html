@@ -61,7 +61,7 @@
 						<legend>Categorias</legend>
 						<md-content>
 							<md-list flex>
-								<md-list-item id="{{c._id}}" ng-repeat="c in categories | filter:search | orderBy:['name']" flex>
+								<md-list-item id="{{c._id}}" ng-repeat="c in catsTree | filter:search" flex>
 									<div class="md-list-item-text" layout="column" style="min-width: 100px;">
 										<p>{{c.name | limitTo: 100}}</p>
 									</div>

@@ -15,6 +15,12 @@ app.controller("indexController", function($scope, $http, $mdMedia, $mdToast, $w
 	$scope.login = {user: '', password: ''};
 	$scope.mobile = ($mdMedia('sm') || $mdMedia('xs'));
 
+	$scope.submit = function(keyEvent){
+		if(keyEvent.which == 13){
+			$scope.doLogin($scope.login);
+		}
+	}
+
 	$scope.doLogin = function(login){
 		if(login.user != '' && login.password != ''){
 			$http({

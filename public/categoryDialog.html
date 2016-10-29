@@ -1,41 +1,41 @@
-<md-dialog aria-label="Editar categoria" flex>	
+<md-dialog aria-label="Editar categoria" flex>
 	<md-toolbar class="md-hue-2">
 		<div class="md-toolbar-tools">
 			<h2>Editar categoria</h2>
 			<span flex></span>
-			<md-button class="md-icon-button" ng-click="cancel();">			
+			<md-button class="md-icon-button" ng-click="cancel();">
 				<i class="material-icons">clear</i>
 			</md-button>
 		</div>
-	</md-toolbar>		
+	</md-toolbar>
 	<form>
-		<md-dialog-content>	
+		<md-dialog-content>
 			<md-content layout-padding>
 				<md-input-container class="md-block" flex>
 					<label>Nome:</label>
 					<input ng-model="category.name">
-				</md-input-container>				
+				</md-input-container>
 				<md-input-container class="md-block">
 					<label>Super categoria:</label>
 					<md-select ng-model="category.superCategory">
 						<md-option value="">
-							Categoria raiz
+							― Sem Categoria ―
 						</md-option>
-						<md-option value="{{cat._id}}" ng-repeat="cat in categories">
+						<md-option value="{{cat._id}}" ng-repeat="cat in catsTree">
 							{{cat.name}}
 						</md-option>
 					</md-select>
-				</md-input-container>			
+				</md-input-container>				
 			</md-content>
 		</md-dialog-content>
 	</form>
-	<md-dialog-actions layout="row">		
+	<md-dialog-actions layout="row">
 		<md-button ng-click="cancel()">
 			Cancelar
 		</md-button>
-		<span flex></span>		
+		<span flex></span>
 		<md-button ng-click="saveCategory('ok', category._id)">
 			Gravar
 		</md-button>
-	</md-dialog-actions>  
+	</md-dialog-actions>
 </md-dialog>

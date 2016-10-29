@@ -36,7 +36,7 @@
 				<md-input-container class="md-block">
 					<label>Categoria:</label>
 					<md-select ng-model="question.category._id">						
-						<md-option value="{{c._id}}" ng-repeat="c in categories">
+						<md-option value="{{c._id}}" ng-repeat="c in catsTree">
 							{{c.name}}
 						</md-option>
 						</me-select>

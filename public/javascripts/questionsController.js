@@ -83,6 +83,30 @@ app.controller("questionController", function ($scope, $http, $mdDialog, $mdMedi
 var questionDialogController = function ($scope, $mdDialog, $http, $mdToast, question, categories) {
 	$scope.question = angular.copy(question);
 	$scope.categories = angular.copy(categories);
+	$scope.catsTree = new Array();
+
+	for (i = 0; i < $scope.categories.length; i++) {
+		var cat = $scope.categories[i];
+		if (!cat.superCategory) {
+			if (indexOf_Id($scope.catsTree, cat._id) == -1) {
+				$scope.catsTree.push(cat);				
+			}
+			for (j = 0; j < cat.subCategories.length; j++) {
+				var subcat = cat.subCategories[j];
+				subcat.name = "― " + subcat.name;
+				if (indexOf_Id($scope.catsTree, subcat._id) == -1) {
+					$scope.catsTree.push(subcat);					
+				}
+				for (k = 0; k < subcat.subCategories.length; k++) {
+					var subsubcat = subcat.subCategories[k];
+					subsubcat.name = "―― " + subsubcat.name;
+					if (indexOf_Id($scope.catsTree, subsubcat._id) == -1) {
+						$scope.catsTree.push(subsubcat);						
+					}
+				}
+			}
+		}
+	}
 
 	$scope.cancel = function () {
 		$mdDialog.cancel();
@@ -91,7 +115,7 @@ var questionDialogController = function ($scope, $mdDialog, $http, $mdToast, que
 	$scope.postOrPutQuestion = function (result, answer, id) {
 		$scope.uploadOK = 1;
 		$scope.question.imagePath = result;
-	
+
 		if (!id) {
 			$http({
 				method: 'POST',
@@ -140,7 +164,7 @@ var questionDialogController = function ($scope, $mdDialog, $http, $mdToast, que
 
 	$scope.saveQuestion = function (answer, id) {
 		//Enviando imagem
-		if ($scope.files.length > 0) {			
+		if ($scope.files.length > 0) {
 			var formData = new FormData();
 			angular.forEach($scope.files, function (obj) {
 				formData.append('files[]', obj.lfFile);
@@ -149,16 +173,16 @@ var questionDialogController = function ($scope, $mdDialog, $http, $mdToast, que
 				transformRequest: angular.identity,
 				headers: { 'Content-Type': undefined }
 			})
-			.then(
-				function(result){
+				.then(
+				function (result) {
 					$scope.postOrPutQuestion(result, answer, id);
 				},
 				function (err) {
 					$scope.uploadOK = 2;
 				}
-			);
+				);
 		}
-		else if (id){			
+		else if (id) {
 			$scope.postOrPutQuestion($scope.question.imagePath, answer, id);
 		}
 		else {

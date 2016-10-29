@@ -9,6 +9,17 @@ var JSONtoForm = function(obj){
 	return str.join("&");
 };
 
+var indexOf_Id = function (array, id) {
+	var index = -1;
+	for (var i = 0; i < array.length; i++) {		
+		if (array[i]._id.toString() == id.toString()) {
+			index = i;
+			break;
+		}
+	}
+	return index;
+}
+
 var app = angular.module("avalweb", ['ngMaterial', 'ngRoute', 'lfNgMdFileInput']);
 
 //Service that keeps application data between index controller and anothers

@@ -14,7 +14,7 @@
 				ng-click="openDialogQuestion($event, q, categories)">
 				<div class="md-list-item-text" layout="column">					
 					<h3>{{q.category.name}}</h3>
-					<p>{{q.wording}}</p>						
+					<p>{{q.wording | limitTo: 100}}</p>					
 				</div>
 				<span flex></span>
 				<md-icon aria-label="remove question"
